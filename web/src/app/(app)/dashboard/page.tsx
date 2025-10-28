@@ -1,6 +1,3 @@
-import { getServerSession } from "next-auth";
-import SignOutButton from "@/components/SignOutButton";
-
 export default async function DashboardPage() {
     return (
         <div className="flex flex-1 flex-col gap-4 p-4">
