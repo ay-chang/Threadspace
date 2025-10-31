@@ -1,14 +1,14 @@
-Threadspace
+# Threadspace
 
 Threadspace is a centralized analytics and monitoring platform for developers who manage multiple apps across different ecosystems. It unifies metrics from services like App Store Connect, Vercel, Stripe, and Google Analytics, allowing developers to see how all of their applications are performing in one place.
 
-Overview
+## Overview
 
 Indie developers and small teams often operate multiple apps—mobile and web—across fragmented platforms. Each platform has its own dashboard, metrics, and reporting format. Threadspace eliminates the need to switch between these dashboards by consolidating key performance data into one unified interface.
 
 Whether you’re tracking iOS downloads, Vercel deployments, or SaaS revenue through Stripe, Threadspace gives you a complete view of your ecosystem with visual insights and AI-powered summaries.
 
-Key Features
+## Key Features
 1. Unified Dashboard
 
 Connect all your platforms in one place and visualize:
