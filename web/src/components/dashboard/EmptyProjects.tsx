@@ -8,6 +8,7 @@ import {
     EmptyDescription,
     EmptyContent,
 } from "../ui/empty";
+import Link from "next/link";
 
 export default function EmptyProjects() {
     return (
@@ -24,7 +25,9 @@ export default function EmptyProjects() {
             </EmptyHeader>
             <EmptyContent>
                 <div className="flex gap-2">
-                    <Button>Create Project</Button>
+                    <Button>
+                        <Link href="/dashboard/create-project">Create Project</Link>
+                    </Button>
                 </div>
             </EmptyContent>
             <Button variant="link" asChild className="text-muted-foreground" size="sm">
