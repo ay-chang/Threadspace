@@ -1,6 +1,6 @@
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
-import LoginCard from "@/components/LoginCard";
+import LoginCard from "@/components/auth/LoginCard";
 
 export default async function LoginPage() {
     const session = await getServerSession();
