@@ -4,24 +4,37 @@
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
-// prisma/schema.prisma
+// Generate: npx prisma migrate dev -n init_projects
+
 generator client {
-  provider = "prisma-client-js"
+    provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
 }
 
 model User {
-  id         String   @id @default(uuid()) @db.Uuid
-  email      String   @unique
-  name       String?
-  provider   String
-  providerId String   @unique
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+    id         String   @id @default(uuid()) @db.Uuid
+    email      String   @unique
+    name       String?
+    provider   String
+    providerId String   @unique
+    createdAt  DateTime @default(now())
+    updatedAt  DateTime @updatedAt
 
-  @@map("users") // tells Prisma to map this model to a 'users' table
+    @@map("users")
+}
+
+model Project {
+    id          String   @id @default(uuid()) @db.Uuid
+    ownerId     String
+    name        String
+    description String
+    type        String
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    @@map("projects")
 }
