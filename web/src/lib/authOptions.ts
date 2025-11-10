@@ -1,8 +1,9 @@
+// /app/api/auth/[...nextauth]/authOptions.ts (or wherever yours lives)
 import { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 
 const NEST_API_BASE = process.env.NEST_API_BASE ?? "http://localhost:8080";
-const INTERNAL_SYNC_TOKEN = process.env.INTERNAL_SYNC_TOKEN!; // server-side only
+const INTERNAL_SYNC_TOKEN = process.env.INTERNAL_SYNC_TOKEN!;
 
 export const authOptions: NextAuthOptions = {
     session: { strategy: "jwt" },
@@ -13,39 +14,48 @@ export const authOptions: NextAuthOptions = {
             clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
         }),
     ],
-    pages: {
-        signIn: "/login",
-    },
+    pages: { signIn: "/login" },
 
-    // Runs on the server after a successful sign-in
-    events: {
-        async signIn({ user, account }) {
-            try {
-                const providerId = account?.providerAccountId; // Google's stable ID
-                if (!providerId) return;
-
-                await fetch(`${NEST_API_BASE}/auth/google/upsert`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "x-internal-token": INTERNAL_SYNC_TOKEN,
-                    },
-                    body: JSON.stringify({
-                        providerId,
-                        email: user.email,
-                        name: user.name,
-                    }),
-                });
-            } catch (err) {
-                console.error("Failed to sync user to Nest:", err);
-                // Don't throw; allow login to proceed
-            }
-        },
-    },
-
-    // (Optional) add fields to session later if you fetch your DB id, etc.
     callbacks: {
-        async session({ session }) {
+        // Called at sign-in time and on subsequent JWT refreshes
+        async jwt({ token, account, profile }) {
+            // On first sign-in with Google, we’ll have `account`+`profile`
+            if (account?.provider === "google" && account.providerAccountId) {
+                try {
+                    const res = await fetch(`${NEST_API_BASE}/auth/google/upsert`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "x-internal-token": INTERNAL_SYNC_TOKEN,
+                        },
+                        body: JSON.stringify({
+                            providerId: account.providerAccountId,
+                            email:
+                                profile && "email" in profile
+                                    ? (profile as any).email
+                                    : undefined,
+                            name:
+                                profile && "name" in profile
+                                    ? (profile as any).name
+                                    : undefined,
+                        }),
+                    });
+                    if (res.ok) {
+                        const user = await res.json(); // { id, email, name, providerId }
+                        token.userId = user.id; // <- stash internal id on the JWT
+                    }
+                } catch (e) {
+                    console.error("Nest upsert failed:", e);
+                }
+            }
+            return token;
+        },
+
+        // Expose userId on the session object for client usage
+        async session({ session, token }) {
+            if (session.user) {
+                (session.user as any).id = token.userId; // <- now available client-side
+            }
             return session;
         },
     },

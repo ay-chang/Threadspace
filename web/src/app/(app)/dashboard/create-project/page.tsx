@@ -1,5 +1,7 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import { useSession } from "next-auth/react";
 import {
     Field,
     FieldDescription,
@@ -18,12 +20,55 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function CreateProjectPage() {
+    const { data: session } = useSession();
+    const router = useRouter();
+
+    const [name, setName] = useState("");
+    const [description, setDescription] = useState("");
+    const [type, setType] = useState<
+        "web" | "ios" | "backend" | "fullstack" | "android" | "other"
+    >();
+
+    const [loading, setLoading] = useState(false);
+    const API = process.env.NEXT_PUBLIC_API_BASE_URL!;
+    const userId = (session?.user as any)?.id;
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!userId) {
+            alert("No user id in session.");
+            return;
+        }
+        setLoading(true);
+
+        try {
+            const res = await fetch(`${API}/projects`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name, description, type, userId }),
+            });
+
+            console.log("Response: ", res);
+
+            if (!res.ok) throw new Error("Failed to create project");
+            const project = await res.json();
+            router.push(`/dashboard/projects/${project.id}`);
+        } catch (err) {
+            console.error(err);
+            alert("Could not create project.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <div className="flex w-full h-full items-center justify-center p-8">
             <div className="w-full max-w-md">
-                <form>
+                <form onSubmit={handleSubmit}>
                     <FieldGroup>
                         <FieldSet>
                             <FieldLegend>Create a new Project</FieldLegend>
@@ -33,14 +78,20 @@ export default function CreateProjectPage() {
                             </FieldDescription>
                             <Field>
                                 <FieldLabel>Project Name</FieldLabel>
-                                <Input id="" placeholder="Evil Rabbit" required />
+                                <Input
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    placeholder="This is a sample title"
+                                    required
+                                />
                             </Field>
                             <Field>
                                 <FieldLabel>Project Description</FieldLabel>
-                                <Textarea id="" placeholder="1234 5678 9012 3456" required />
-                                <FieldDescription>
-                                    Give your project a description.
-                                </FieldDescription>
+                                <Textarea
+                                    value={description}
+                                    onChange={(e) => setDescription(e.target.value)}
+                                    placeholder="This is a sample description"
+                                />
                             </Field>
                         </FieldSet>
 
@@ -54,16 +105,20 @@ export default function CreateProjectPage() {
                             </FieldDescription>
                             <Field>
                                 <FieldLabel>Project Type</FieldLabel>
-                                <Select defaultValue="">
-                                    <SelectTrigger className="w-full" id="">
-                                        <SelectValue placeholder="Web" />
+                                <Select value={type} onValueChange={(v) => setType(v as any)}>
+                                    <SelectTrigger
+                                        className="w-full"
+                                        aria-label="Project Type"
+                                    >
+                                        <SelectValue placeholder="Select a type" />
                                     </SelectTrigger>
+
                                     <SelectContent>
                                         <SelectItem value="web">Web</SelectItem>
-                                        <SelectItem value="ios">IOS (Mobile)</SelectItem>
+                                        <SelectItem value="ios">iOS (Mobile)</SelectItem>
                                         <SelectItem value="backend">Backend/API</SelectItem>
                                         <SelectItem value="android">Android</SelectItem>
-                                        <SelectItem value="full-stack">Full Stack</SelectItem>
+                                        <SelectItem value="fullstack">Full Stack</SelectItem>
                                         <SelectItem value="other">Other</SelectItem>
                                     </SelectContent>
                                 </Select>
@@ -71,7 +126,9 @@ export default function CreateProjectPage() {
                         </FieldSet>
 
                         <Field orientation="horizontal">
-                            <Button type="submit">Submit</Button>
+                            <Button type="submit" disabled={loading || !userId}>
+                                {loading ? "Creating..." : "Create Project"}
+                            </Button>
                             <Button variant="outline" type="button">
                                 Cancel
                             </Button>
