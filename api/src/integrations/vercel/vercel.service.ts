@@ -12,6 +12,7 @@ type SummaryInput = { project: string; teamId?: string };
 export class VercelService {
     constructor(private readonly http: HttpService) {}
 
+    // Get auth header from db
     private get authHeader() {
         const token = process.env.VERCEL_TOKEN;
         if (!token) throw new UnauthorizedException('VERCEL_TOKEN not set');
