@@ -13,17 +13,17 @@ public class User {
     @Column(name = "id")
     private UUID id;
 
-    @Column(name = "provider", nullable = false)
-    private String provider;
-
-    @Column(name = "providerId", nullable = false, unique = true)
-    private String providerId;
-
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
     @Column(name = "name")
     private String name;
+
+    @Column(name = "provider", nullable = false)
+    private String provider;
+
+    @Column(name = "providerId", nullable = false, unique = true)
+    private String providerId;
 
     @Column(name = "createdAt")
     private OffsetDateTime createdAt;

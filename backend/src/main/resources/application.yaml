@@ -13,7 +13,12 @@ spring:
     jpa:
         hibernate:
             ddl-auto: none
-        show-sql: true
+            naming:
+                # This avoids the default snake_case to camelCase conversion
+                physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+        properties:
+            hibernate:
+                globally_quoted_identifiers]: true
 
 server:
     port: 8080
