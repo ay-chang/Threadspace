@@ -1,5 +1,6 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import IntegrationCard from "@/components/dashboard/IntegrationCard";
+import { AVAILABLE_INTEGRATIONS } from "./integrations";
 
 export default function Integrations() {
     return (
@@ -21,12 +22,15 @@ export default function Integrations() {
                     <TabsContent value="Connected">See your connected APIs.</TabsContent>
                     <TabsContent value="Available">
                         <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                            <IntegrationCard />
-                            <IntegrationCard />
-                            <IntegrationCard />
-                            <IntegrationCard />
-                            <IntegrationCard />
-                            <IntegrationCard />
+                        {AVAILABLE_INTEGRATIONS.map((integration) => (
+                            <IntegrationCard
+                                key={integration.id}
+                                name={integration.name}
+                                description={integration.description}
+                                logoSrc={integration.logoSrc}
+                                logoAlt={integration.logoAlt}
+                            />
+                        ))}
                         </div>
                     </TabsContent>
                 </Tabs>
