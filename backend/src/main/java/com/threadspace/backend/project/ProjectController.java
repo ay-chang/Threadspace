@@ -1,0 +1,49 @@
+package com.threadspace.backend.project;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import static com.threadspace.backend.project.ProjectDtos.ProjectCreateRequest;
+import static com.threadspace.backend.project.ProjectDtos.ProjectResponse;
+
+@RestController
+@RequestMapping("/projects")
+public class ProjectController {
+
+    private final ProjectService projectsService;
+
+    @Value("${INTERNAL_SYNC_TOKEN}")
+    private String internalSyncToken;
+
+    public ProjectController(ProjectService projectsService) {
+        this.projectsService = projectsService;
+    }
+
+    @PostMapping
+    public ResponseEntity<ProjectResponse> createProject(
+            @RequestBody ProjectCreateRequest body,
+            @RequestHeader(name = "x-internal-token", required = false) String token) {
+        if (token == null || !token.equals(internalSyncToken)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        Project project = projectsService.createProject(
+                body.name(),
+                body.description(),
+                body.type(),
+                body.userId());
+
+        ProjectResponse response = new ProjectResponse(
+                project.getId(),
+                project.getName(),
+                project.getDescription(),
+                project.getType(),
+                project.getCreatedAt(),
+                project.getUpdatedAt(),
+                project.getUserId());
+
+        return ResponseEntity.ok(response);
+    }
+}
