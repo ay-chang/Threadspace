@@ -24,31 +24,43 @@ export default function IntegrationCard({
   connected = false,
 }: IntegrationCardProps) {
   return (
-    <Card className="h-full flex flex-col">
-      <CardHeader className="flex flex-row items-center gap-3">
-        <div className="h-10 w-10 rounded-md bg-muted flex items-center justify-center overflow-hidden">
-          <img
-            src={logoSrc}
-            alt={logoAlt}
-            className="h-8 w-8 object-contain"
-          />
+    <Card className="w-60 flex-shrink-0 flex flex-col rounded-2xl border bg-white shadow-sm">
+      <CardHeader className="space-y-4 pb-3">
+        <div className="flex items-center justify-between">
+          <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-gray-100">
+            <img
+              src={logoSrc}
+              alt={logoAlt}
+              className="max-h-8 max-w-8 object-contain"
+            />
+          </div>
+
+          {/* <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">
+            Connected
+          </span> */}
+           {<span className="text-[11px] px-2 py-0.5 rounded-full bg-red-50 text-red-700 border border-red-100">
+            Not Connected
+          </span>}
         </div>
-        <div>
-          <CardTitle className="text-base">{name}</CardTitle>
-          <CardDescription className="text-xs">
+
+        <div className="space-y-1">
+          <CardTitle className="text-sm font-semibold leading-snug">
+            {name}
+          </CardTitle>
+          <CardDescription className="text-xs leading-snug text-gray-500">
             {description}
           </CardDescription>
         </div>
       </CardHeader>
 
-      <CardContent className="flex-1">
-      </CardContent>
+      <CardContent className="flex-1" />
 
-      <CardFooter className="flex items-center justify-between">
-        <p className="text-xs text-muted-foreground">
-          {connected ? "Connected" : "Not connected"}
-        </p>
-        <Button size="sm" variant={connected ? "outline" : "default"}>
+      <CardFooter className="mt-auto flex items-center justify-end pt-0">
+        <Button
+          size="sm"
+          variant={connected ? "outline" : "default"}
+          className="px-3 text-xs"
+        >
           {connected ? "Manage" : "Connect"}
         </Button>
       </CardFooter>

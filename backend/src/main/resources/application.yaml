@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: backend
+
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+
+server:
+  port: 8080
+
+app:
+  internal-sync-token: ${INTERNAL_SYNC_TOKEN}
+  vercel-token: ${VERCEL_TOKEN}
