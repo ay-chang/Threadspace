@@ -2,10 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 
-const BACKEND_BASE =
-    process.env.NEST_API_BASE ??
-    process.env.NEXT_PUBLIC_API_BASE_URL ??
-    "http://localhost:8080";
+const BACKEND_BASE = process.env.BACKEND_BASE!;
 const INTERNAL_SYNC_TOKEN = process.env.INTERNAL_SYNC_TOKEN!;
 
 export async function POST(req: NextRequest) {
