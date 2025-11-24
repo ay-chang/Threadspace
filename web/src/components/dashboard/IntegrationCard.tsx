@@ -24,10 +24,10 @@ export default function IntegrationCard({
   connected = false,
 }: IntegrationCardProps) {
   return (
-    <Card className="w-60 flex-shrink-0 flex flex-col rounded-2xl border bg-white shadow-sm">
+    <Card className="w-64 flex-shrink-0 flex flex-col rounded-2xl border bg-white shadow-sm">
       <CardHeader className="space-y-4 pb-3">
         <div className="flex items-center justify-between">
-          <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-gray-100">
+          <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl">
             <img
               src={logoSrc}
               alt={logoAlt}
@@ -38,9 +38,9 @@ export default function IntegrationCard({
           {/* <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">
             Connected
           </span> */}
-           {<span className="text-[11px] px-2 py-0.5 rounded-full bg-red-50 text-red-700 border border-red-100">
+           {/*<span className="text-[11px] px-2 py-0.5 rounded-full bg-red-50 text-red-700 border border-red-100">
             Not Connected
-          </span>}
+          </span>*/}
         </div>
 
         <div className="space-y-1">
@@ -55,11 +55,11 @@ export default function IntegrationCard({
 
       <CardContent className="flex-1" />
 
-      <CardFooter className="mt-auto flex items-center justify-end pt-0">
+      <CardFooter className="mt-auto pt-0">
         <Button
           size="sm"
           variant={connected ? "outline" : "default"}
-          className="px-3 text-xs"
+          className="w-full px-3 text-xs"
         >
           {connected ? "Manage" : "Connect"}
         </Button>
