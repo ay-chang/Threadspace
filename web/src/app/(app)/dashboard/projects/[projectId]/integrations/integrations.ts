@@ -20,5 +20,26 @@ export const AVAILABLE_INTEGRATIONS = [
       logoSrc: "/integrations/apple.svg",
       logoAlt: "Apple logo",
     },
+    {
+      id: "plaid",
+      name: "Plaid",
+      description: "See financial data from Plaid",
+      logoSrc: "/integrations/plaid.svg",
+      logoAlt: "Plaid logo",
+    },
+    {
+      id: "aws",
+      name: "AWS",
+      description: "See data from your AWS Database",
+      logoSrc: "/integrations/aws.webp",
+      logoAlt: "AWS logo",
+    },
+    {
+      id: "google_ads",
+      name: "Google Ads",
+      description: "See metrics from your Google Ads",
+      logoSrc: "/integrations/google_ads.svg",
+      logoAlt: "Google_Ads logo",
+    },
   ];
   

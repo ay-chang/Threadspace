@@ -50,7 +50,7 @@ export default function CreateProjectPage() {
 
             if (!res.ok) throw new Error("Failed to create project");
             const project = await res.json();
-            router.push(`/dashboard/projects/${project.id}`);
+            router.push(`/dashboard/projects/${project.id}/integrations`);
         } catch (err) {
             console.error(err);
             alert("Could not create project.");
