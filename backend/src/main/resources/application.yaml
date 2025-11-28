@@ -1,20 +1,24 @@
 spring:
-  application:
-    name: backend
+    config:
+        import: optional:file:.env.properties
 
-  datasource:
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    application:
+        name: backend
 
-  jpa:
-    hibernate:
-      ddl-auto: none
-    show-sql: true
+    datasource:
+        url: ${DB_URL}
+        username: ${DB_USERNAME}
+        password: ${DB_PASSWORD}
+
+    jpa:
+        hibernate:
+            ddl-auto: none
+            naming:
+                # This avoids the default snake_case to camelCase conversion
+                physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+        properties:
+            hibernate:
+                globally_quoted_identifiers: true
 
 server:
-  port: 8080
-
-app:
-  internal-sync-token: ${INTERNAL_SYNC_TOKEN}
-  vercel-token: ${VERCEL_TOKEN}
+    port: 8080

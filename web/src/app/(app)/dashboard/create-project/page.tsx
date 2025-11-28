@@ -34,22 +34,16 @@ export default function CreateProjectPage() {
     >();
 
     const [loading, setLoading] = useState(false);
-    const API = process.env.NEXT_PUBLIC_API_BASE_URL!;
-    const userId = (session?.user as any)?.id;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!userId) {
-            alert("No user id in session.");
-            return;
-        }
         setLoading(true);
 
         try {
-            const res = await fetch(`${API}/projects`, {
+            const res = await fetch("/api/projects", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ name, description, type, userId }),
+                body: JSON.stringify({ name, description, type }),
             });
 
             console.log("Response: ", res);
@@ -126,7 +120,7 @@ export default function CreateProjectPage() {
                         </FieldSet>
 
                         <Field orientation="horizontal">
-                            <Button type="submit" disabled={loading || !userId}>
+                            <Button type="submit" disabled={loading}>
                                 {loading ? "Creating..." : "Create Project"}
                             </Button>
                             <Button variant="outline" type="button">

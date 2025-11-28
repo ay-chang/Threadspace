@@ -2,7 +2,7 @@
 import { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 
-const NEST_API_BASE = process.env.NEST_API_BASE ?? "http://localhost:8080";
+const BACKEND_BASE = process.env.BACKEND_BASE!;
 const INTERNAL_SYNC_TOKEN = process.env.INTERNAL_SYNC_TOKEN!;
 
 export const authOptions: NextAuthOptions = {
@@ -22,7 +22,7 @@ export const authOptions: NextAuthOptions = {
             // On first sign-in with Google, we’ll have `account`+`profile`
             if (account?.provider === "google" && account.providerAccountId) {
                 try {
-                    const res = await fetch(`${NEST_API_BASE}/auth/google/upsert`, {
+                    const res = await fetch(`${BACKEND_BASE}/auth/google/upsert`, {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",
@@ -45,7 +45,7 @@ export const authOptions: NextAuthOptions = {
                         token.userId = user.id; // <- stash internal id on the JWT
                     }
                 } catch (e) {
-                    console.error("Nest upsert failed:", e);
+                    console.error("Next upsert failed:", e);
                 }
             }
             return token;

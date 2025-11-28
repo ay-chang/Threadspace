@@ -14,7 +14,7 @@ public class AuthController {
 
     private final UsersService usersService;
 
-    @Value("${app.internal-sync-token}")
+    @Value("${INTERNAL_SYNC_TOKEN}")
     private String internalSyncToken;
 
     public AuthController(UsersService usersService) {
