@@ -13,9 +13,9 @@ export default function Integrations() {
                 </p>
             </div>
 
-            <div className="mb-4">
+            <div className="">
                 <Tabs defaultValue="Connected" className="w-full">
-                    <TabsList>
+                    <TabsList className="mb-6">
                         <TabsTrigger value="Connected">Connected</TabsTrigger>
                         <TabsTrigger value="Available">Available</TabsTrigger>
                     </TabsList>
