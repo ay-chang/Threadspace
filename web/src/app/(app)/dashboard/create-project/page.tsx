@@ -24,7 +24,6 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function CreateProjectPage() {
-    const { data: session } = useSession();
     const router = useRouter();
 
     const [name, setName] = useState("");
