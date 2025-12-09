@@ -1,5 +1,6 @@
 package com.threadspace.backend.integration.core;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.threadspace.backend.integration.core.IntegrationDtos.IntegrationCreateRequest;
 import com.threadspace.backend.integration.core.IntegrationDtos.IntegrationResponse;
 
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -54,6 +56,31 @@ public class IntegrationController {
                 integration.getUpdatedAt());
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<IntegrationResponse>> listIntegrationsForProject(
+            @PathVariable("projectId") UUID projectId,
+            @RequestHeader(name = "x-internal-token", required = false) String token) {
+
+        if (token == null || !token.equals(internalSyncToken)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        List<IntegrationResponse> responses = integrationService
+                .getIntegrationsForProject(projectId)
+                .stream()
+                .map(integration -> new IntegrationResponse(
+                        integration.getId(),
+                        integration.getProjectId(),
+                        integration.getIntegrationType(),
+                        integration.getIntegrationStatus(),
+                        integration.getDisplayName(),
+                        integration.getCreatedAt(),
+                        integration.getUpdatedAt()))
+                .toList();
+
+        return ResponseEntity.ok(responses);
     }
 
 }
