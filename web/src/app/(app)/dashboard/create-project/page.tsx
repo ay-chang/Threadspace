@@ -1,7 +1,6 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useSession } from "next-auth/react";
 import {
     Field,
     FieldDescription,
@@ -23,14 +22,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+type ProjectType = "web" | "ios" | "backend" | "fullstack" | "android" | "other";
+
 export default function CreateProjectPage() {
     const router = useRouter();
 
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
-    const [type, setType] = useState<
-        "web" | "ios" | "backend" | "fullstack" | "android" | "other"
-    >();
+    const [type, setType] = useState<ProjectType>();
 
     const [loading, setLoading] = useState(false);
 
@@ -98,7 +97,10 @@ export default function CreateProjectPage() {
                             </FieldDescription>
                             <Field>
                                 <FieldLabel>Project Type</FieldLabel>
-                                <Select value={type} onValueChange={(v) => setType(v as any)}>
+                                <Select
+                                    value={type}
+                                    onValueChange={(v) => setType(v as ProjectType)}
+                                >
                                     <SelectTrigger
                                         className="w-full"
                                         aria-label="Project Type"

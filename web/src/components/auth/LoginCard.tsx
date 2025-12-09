@@ -12,7 +12,7 @@ export default function LoginCard() {
             <div className="mb-6">
                 <h1 className="text-xl font-semibold">Sign in to Threadspace</h1>
                 <p className="text-sm text-muted-foreground">
-                    Don't have an account? <span className="underline">Get started</span>
+                    Don&apos;t have an account? <span className="underline">Get started</span>
                 </p>
             </div>
 

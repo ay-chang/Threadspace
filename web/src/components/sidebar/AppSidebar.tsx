@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import {
     Sidebar,
     SidebarContent,
@@ -13,7 +15,7 @@ import {
     SidebarMenuItem,
 } from "@/components/ui/sidebar";
 
-import { Cable, LayoutDashboard, Settings, ChevronUp } from "lucide-react";
+import { Cable, LayoutDashboard, Settings } from "lucide-react";
 import ProjectSwitcher from "@/components/sidebar/ProjectSwitcher";
 import SidebarOptions from "@/components/sidebar/SidebarOptions";
 
@@ -37,10 +39,10 @@ export default function AppSidebar() {
                         <SidebarMenu>
                             <SidebarMenuItem>
                                 <SidebarMenuButton asChild>
-                                    <a href="/">
+                                    <Link href="/">
                                         <LayoutDashboard />
                                         <span>Dashboard</span>
-                                    </a>
+                                    </Link>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
                         </SidebarMenu>
@@ -50,10 +52,10 @@ export default function AppSidebar() {
                         <SidebarMenu>
                             <SidebarMenuItem>
                                 <SidebarMenuButton asChild>
-                                    <a href="/">
+                                    <Link href="/">
                                         <Cable />
                                         <span>Integrations</span>
-                                    </a>
+                                    </Link>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
                         </SidebarMenu>
@@ -64,10 +66,10 @@ export default function AppSidebar() {
                         <SidebarMenu>
                             <SidebarMenuItem>
                                 <SidebarMenuButton asChild>
-                                    <a href="/">
+                                    <Link href="/">
                                         <Settings />
                                         <span>Settings</span>
-                                    </a>
+                                    </Link>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
                         </SidebarMenu>

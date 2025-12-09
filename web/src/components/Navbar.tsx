@@ -1,20 +1,14 @@
-import { getServerSession } from "next-auth";
 import {
     NavigationMenu,
     NavigationMenuList,
     NavigationMenuItem,
     NavigationMenuLink,
     navigationMenuTriggerStyle,
-    NavigationMenuContent,
-    NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 import Link from "next/link";
 import { Button } from "./ui/button";
 
 export default async function Navbar() {
-    const session = await getServerSession();
-    const user = session?.user;
-
     return (
         <header className="">
             <div className="mx-auto max-w-6xl px-4 h-14 flex items-center justify-between">

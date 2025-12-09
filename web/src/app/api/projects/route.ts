@@ -2,17 +2,23 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 
+type SessionUser = {
+    id: string;
+    name?: string;
+    email?: string;
+};
+
 const BACKEND_BASE = process.env.BACKEND_BASE!;
 const INTERNAL_SYNC_TOKEN = process.env.INTERNAL_SYNC_TOKEN!;
 
 export async function POST(req: NextRequest) {
     const session = await getServerSession(authOptions);
 
-    if (!session || !session.user || !(session.user as any).id) {
+    if (!session || !session.user || !(session.user as SessionUser).id) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const userId = (session.user as any).id;
+    const userId = (session.user as SessionUser).id;
 
     let body: { name?: string; description?: string; type?: string };
     try {

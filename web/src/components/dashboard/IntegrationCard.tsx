@@ -7,6 +7,7 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 
 type IntegrationCardProps = {
     name: string;
@@ -28,7 +29,13 @@ export default function IntegrationCard({
             <CardHeader className="space-y-4 pb-3">
                 <div className="flex items-center justify-between">
                     <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl">
-                        <img src={logoSrc} alt={logoAlt} className="h-8 w-8 object-contain" />
+                        <Image
+                            src={logoSrc}
+                            alt={logoAlt}
+                            width={32}
+                            height={32}
+                            className="h-8 w-8 object-contain"
+                        />
                     </div>
                 </div>
 

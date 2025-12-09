@@ -19,9 +19,13 @@ export const authOptions: NextAuthOptions = {
     callbacks: {
         // Called at sign-in time and on subsequent JWT refreshes
         async jwt({ token, account, profile }) {
-            // On first sign-in with Google, we’ll have `account`+`profile`
             if (account?.provider === "google" && account.providerAccountId) {
                 try {
+                    const typedProfile =
+                        profile && typeof profile === "object"
+                            ? (profile as { email?: string; name?: string })
+                            : undefined;
+
                     const res = await fetch(`${BACKEND_BASE}/auth/google/upsert`, {
                         method: "POST",
                         headers: {
@@ -30,19 +34,14 @@ export const authOptions: NextAuthOptions = {
                         },
                         body: JSON.stringify({
                             providerId: account.providerAccountId,
-                            email:
-                                profile && "email" in profile
-                                    ? (profile as any).email
-                                    : undefined,
-                            name:
-                                profile && "name" in profile
-                                    ? (profile as any).name
-                                    : undefined,
+                            email: typedProfile?.email,
+                            name: typedProfile?.name,
                         }),
                     });
+
                     if (res.ok) {
-                        const user = await res.json(); // { id, email, name, providerId }
-                        token.userId = user.id; // <- stash internal id on the JWT
+                        const user: { id: string } = await res.json(); // { id, email, name, providerId }
+                        (token as { userId?: string }).userId = user.id; // stash internal id
                     }
                 } catch (e) {
                     console.error("Next upsert failed:", e);
@@ -53,8 +52,8 @@ export const authOptions: NextAuthOptions = {
 
         // Expose userId on the session object for client usage
         async session({ session, token }) {
-            if (session.user) {
-                (session.user as any).id = token.userId; // <- now available client-side
+            if (session.user && "userId" in token && typeof token.userId === "string") {
+                (session.user as { id?: string }).id = token.userId;
             }
             return session;
         },
