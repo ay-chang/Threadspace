@@ -1,8 +1,6 @@
 package com.threadspace.backend.project;
 
 import org.springframework.stereotype.Service;
-
-import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Service
@@ -25,15 +23,11 @@ public class ProjectService {
             throw new IllegalArgumentException("User ID must not be null");
         }
 
-        OffsetDateTime now = OffsetDateTime.now();
-
         Project project = new Project();
         project.setName(name);
         project.setDescription(description);
         project.setType(type);
         project.setUserId(userId);
-        project.setCreatedAt(now);
-        project.setUpdatedAt(now);
 
         return projectRepository.save(project);
     }
