@@ -55,6 +55,33 @@ export const authOptions: NextAuthOptions = {
                 } catch (e) {
                     console.error("Next upsert failed:", e);
                 }
+            } else if (!(token as any).userId && token.sub) {
+                // Fallback: if the token lacks userId (e.g., after a reset) but we have a provider id,
+                // upsert again using token fields to recover the internal user id.
+                try {
+                    const res = await fetch(`${BACKEND_BASE}/auth/google/upsert`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "x-internal-token": INTERNAL_SYNC_TOKEN,
+                        },
+                        body: JSON.stringify({
+                            providerId: token.sub,
+                            email: token.email,
+                            name: token.name,
+                        }),
+                    });
+
+                    if (!res.ok) {
+                        console.error("Upsert fallback failed:", res.status, await res.text());
+                        return token;
+                    }
+
+                    const user: { id: string } = await res.json();
+                    (token as any).userId = user.id;
+                } catch (e) {
+                    console.error("Next upsert fallback failed:", e);
+                }
             }
 
             return token;

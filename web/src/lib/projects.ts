@@ -5,10 +5,11 @@ export type Project = {
     name: string;
     description?: string | null;
     type: string;
+    createdAt?: string;
 };
 
 const getBaseUrl = async () => {
-    const hdrs = await headers(); // ensure headers() is awaited
+    const hdrs = await headers();
     const proto = hdrs.get("x-forwarded-proto") ?? "http";
     const host = hdrs.get("x-forwarded-host") ?? hdrs.get("host");
     if (host) return `${proto}://${host}`;
@@ -19,9 +20,10 @@ export async function fetchProjects(): Promise<Project[]> {
     const baseUrl = await getBaseUrl();
 
     try {
+        const cookieHeader = (await cookies()).toString();
         const res = await fetch(`${baseUrl}/api/projects`, {
             cache: "no-store",
-            headers: { cookie: cookies().toString() }, // forward session
+            headers: { cookie: cookieHeader },
         });
 
         if (!res.ok) {
