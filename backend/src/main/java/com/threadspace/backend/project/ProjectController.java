@@ -5,8 +5,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.threadspace.backend.project.ProjectDtos.ProjectCreateRequest;
+import com.threadspace.backend.project.ProjectDtos.ProjectResponse;
+
 import static com.threadspace.backend.project.ProjectDtos.ProjectCreateRequest;
 import static com.threadspace.backend.project.ProjectDtos.ProjectResponse;
+
+import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/projects")
@@ -19,6 +25,33 @@ public class ProjectController {
 
     public ProjectController(ProjectService projectsService) {
         this.projectsService = projectsService;
+    }
+
+    @GetMapping
+    public ResponseEntity<List<ProjectResponse>> getProjectsForUser(
+            @RequestParam("userId") UUID userId,
+            @RequestHeader(name = "x-internal-token", required = false) String token) {
+        if (token == null || !token.equals(internalSyncToken)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+
+        List<ProjectResponse> responses = projectsService.getProjectsForUser(userId)
+                .stream()
+                .map(project -> new ProjectResponse(
+                        project.getId(),
+                        project.getName(),
+                        project.getDescription(),
+                        project.getType(),
+                        project.getCreatedAt(),
+                        project.getUpdatedAt(),
+                        project.getUserId()))
+                .toList();
+
+        return ResponseEntity.ok(responses);
     }
 
     @PostMapping

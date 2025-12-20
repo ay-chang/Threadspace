@@ -1,6 +1,8 @@
 package com.threadspace.backend.project;
 
 import org.springframework.stereotype.Service;
+import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -30,5 +32,10 @@ public class ProjectService {
         project.setUserId(userId);
 
         return projectRepository.save(project);
+    }
+
+    public List<Project> getProjectsForUser(UUID userId) {
+        Objects.requireNonNull(userId, "userId must not be null");
+        return projectRepository.findByUserId(userId);
     }
 }
