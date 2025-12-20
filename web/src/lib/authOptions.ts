@@ -19,6 +19,12 @@ export const authOptions: NextAuthOptions = {
     callbacks: {
         // Called at sign-in time and on subsequent JWT refreshes
         async jwt({ token, account, profile }) {
+            // If we already have the internal userId, do nothing
+            if (typeof (token as any).userId === "string") {
+                return token;
+            }
+
+            // Only at sign-in time do we have account/providerAccountId
             if (account?.provider === "google" && account.providerAccountId) {
                 try {
                     const typedProfile =
@@ -39,17 +45,20 @@ export const authOptions: NextAuthOptions = {
                         }),
                     });
 
-                    if (res.ok) {
-                        const user: { id: string } = await res.json(); // { id, email, name, providerId }
-                        (token as { userId?: string }).userId = user.id; // stash internal id
+                    if (!res.ok) {
+                        console.error("Upsert failed:", res.status, await res.text());
+                        return token;
                     }
+
+                    const user: { id: string } = await res.json();
+                    (token as any).userId = user.id;
                 } catch (e) {
                     console.error("Next upsert failed:", e);
                 }
             }
+
             return token;
         },
-
         // Expose userId on the session object for client usage
         async session({ session, token }) {
             if (session.user && "userId" in token && typeof token.userId === "string") {

@@ -1,20 +1,14 @@
 import EmptyProjects from "@/components/dashboard/EmptyProjects";
+import { fetchProjects } from "@/lib/projects";
+import ProjectsList from "@/components/dashboard/ProjectsList";
 
-export default function DashboardPage() {
-    const hasProjects = false;
+export default async function DashboardPage() {
+    const projects = await fetchProjects();
+    const hasProjects = projects.length > 0;
 
     if (!hasProjects) {
-        return EmptyProjects();
+        return <EmptyProjects />;
     }
 
-    return (
-        <div className="flex flex-1 flex-col gap-4 p-4">
-            <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-                <div className="bg-muted aspect-video rounded-xl" />
-                <div className="bg-muted aspect-video rounded-xl" />
-                <div className="bg-muted aspect-video rounded-xl" />
-            </div>
-            <div className="bg-muted min-h-screen flex-1 rounded-xl md:min-h-min" />
-        </div>
-    );
+    return <ProjectsList projects={projects} />;
 }

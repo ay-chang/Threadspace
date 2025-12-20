@@ -66,3 +66,43 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Internal server error" }, { status: 500 });
     }
 }
+
+export async function GET() {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user) {
+        return NextResponse.json({ error: "Unauthorized: no session" }, { status: 401 });
+    }
+    if (!(session.user as any).id) {
+        return NextResponse.json(
+            { error: "Unauthorized: missing user id", user: session.user },
+            { status: 401 }
+        );
+    }
+
+    const userId = (session.user as SessionUser).id;
+
+    try {
+        const res = await fetch(`${BACKEND_BASE}/projects?userId=${userId}`, {
+            method: "GET",
+            headers: {
+                "x-internal-token": INTERNAL_SYNC_TOKEN,
+            },
+            cache: "no-store",
+        });
+
+        if (!res.ok) {
+            const text = await res.text();
+            return NextResponse.json(
+                { error: "Failed to fetch projects", backend: text || undefined },
+                { status: 500 }
+            );
+        }
+
+        const projects = await res.json();
+        return NextResponse.json(projects, { status: 200 });
+    } catch (err) {
+        console.error("Error calling backend /projects:", err);
+        return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    }
+}
