@@ -12,11 +12,11 @@ import org.springframework.stereotype.Service;
 public class IntegrationService {
 
     private final IntegrationRepository integrationRepository;
-    private final Map<IntegrationType, IntegrationProvider> providerByType;
+    private final Map<IntegrationType, IntegrationProvider> providerByType; 
 
     public IntegrationService(IntegrationRepository integrationRepository, List<IntegrationProvider> providers) {
         this.integrationRepository = integrationRepository;
-        this.providerByType = providers.stream().collect(Collectors.toMap(IntegrationProvider::getType, p -> p));
+        this.providerByType = providers.stream().collect(Collectors.toMap(IntegrationProvider::getType, p -> p)); // {VERCEL -> VI, AWS -> AWSI}
     }
 
     public Integration createIntegration(String displayName, IntegrationType integrationType, UUID projectId) {
@@ -46,7 +46,7 @@ public class IntegrationService {
 
     public Integration connectIntegration(
             UUID projectId,
-            IntegrationType type,
+            IntegrationType type, // VERCEL
             String displayName,
             Map<String, String> credentials) {
         if (projectId == null) {
@@ -55,6 +55,8 @@ public class IntegrationService {
         if (type == null) {
             throw new IllegalArgumentException("integration type must not be null");
         }
+
+        // {VERCEL -> Vercel Instance (VercelIntegrationProver)}
 
         IntegrationProvider provider = providerByType.get(type);
         if (provider == null) {
