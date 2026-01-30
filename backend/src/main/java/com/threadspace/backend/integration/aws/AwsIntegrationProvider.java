@@ -14,6 +14,12 @@ import com.threadspace.backend.integration.core.IntegrationStatus;
 import com.threadspace.backend.integration.core.IntegrationType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.sts.StsClient;
+import software.amazon.awssdk.services.sts.model.GetCallerIdentityResponse;
+import software.amazon.awssdk.services.sts.model.StsException;
 
 @Service
 public class AwsIntegrationProvider implements IntegrationProvider {
@@ -96,8 +102,29 @@ public class AwsIntegrationProvider implements IntegrationProvider {
 
         integrationSecretRepository.save(secret);
 
-        // TODO: Validate AWS credentials 
+        // Validate AWS credentials
+        verifyCredentials(accessKeyId.trim(), secretAccessKey.trim(), region.trim());
+
         integration.setIntegrationStatus(IntegrationStatus.CONNECTED);
         return integrationRepository.save(integration);
+    }
+
+    private void verifyCredentials(String accessKeyId, String secretAccessKey, String region) {
+        AwsBasicCredentials credentials = AwsBasicCredentials.create(accessKeyId, secretAccessKey);
+
+        try (StsClient stsClient = StsClient.builder()
+                .region(Region.of(region))
+                .credentialsProvider(StaticCredentialsProvider.create(credentials))
+                .build()) {
+
+            GetCallerIdentityResponse response = stsClient.getCallerIdentity();
+            // Credentials are valid - identity confirmed
+            // Account: response.account(), ARN: response.arn()
+
+        } catch (StsException e) {
+            throw new IllegalArgumentException("Invalid AWS credentials: " + e.awsErrorDetails().errorMessage(), e);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Failed to verify AWS credentials: " + e.getMessage(), e);
+        }
     }
 }
