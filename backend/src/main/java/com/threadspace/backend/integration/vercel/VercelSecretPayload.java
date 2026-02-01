@@ -1,6 +1,7 @@
 package com.threadspace.backend.integration.vercel;
 
 public record VercelSecretPayload(
-                String apiToken,
-                String projectName) {
+        String apiToken,
+        String projectName,
+        String teamId) {
 }

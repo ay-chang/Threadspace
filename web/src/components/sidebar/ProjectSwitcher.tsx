@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import { useRouter } from "next/navigation";
 import { Check, ChevronsUpDown, GalleryVerticalEnd } from "lucide-react";
 
 import {
@@ -10,15 +10,17 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
+import { Project } from "@/lib/projects";
 
 export default function ProjectSwitcher({
     projects,
-    overview,
+    currentProjectId,
 }: {
-    projects: string[];
-    overview: string;
+    projects: Project[];
+    currentProjectId: string | null;
 }) {
-    const [selectedProject, setSelectedProject] = React.useState(overview);
+    const router = useRouter();
+    const currentProject = projects.find((p) => p.id === currentProjectId);
 
     return (
         <SidebarMenu>
@@ -34,7 +36,9 @@ export default function ProjectSwitcher({
                             </div>
                             <div className="flex flex-col gap-0.5 leading-none">
                                 <span className="font-medium">Projects</span>
-                                <span className="">{selectedProject}</span>
+                                <span className="text-xs text-sidebar-foreground/60">
+                                    {currentProject?.name ?? "Select a project"}
+                                </span>
                             </div>
                             <ChevronsUpDown className="ml-auto" />
                         </SidebarMenuButton>
@@ -43,15 +47,21 @@ export default function ProjectSwitcher({
                         className="w-(--radix-dropdown-menu-trigger-width)"
                         align="start"
                     >
-                        {projects.map((project) => (
-                            <DropdownMenuItem
-                                key={project}
-                                onSelect={() => setSelectedProject(project)}
-                            >
-                                {project}{" "}
-                                {project === selectedProject && <Check className="ml-auto" />}
-                            </DropdownMenuItem>
-                        ))}
+                        {projects.length === 0 ? (
+                            <DropdownMenuItem disabled>No projects yet</DropdownMenuItem>
+                        ) : (
+                            projects.map((project) => (
+                                <DropdownMenuItem
+                                    key={project.id}
+                                    onSelect={() =>
+                                        router.push(`/dashboard/projects/${project.id}/dashboard`)
+                                    }
+                                >
+                                    {project.name}
+                                    {project.id === currentProjectId && <Check className="ml-auto" />}
+                                </DropdownMenuItem>
+                            ))
+                        )}
                     </DropdownMenuContent>
                 </DropdownMenu>
             </SidebarMenuItem>

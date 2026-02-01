@@ -10,7 +10,7 @@ export const AVAILABLE_INTEGRATIONS = [
       id: "vercel",
       name: "Vercel",
       description: "Deploy and preview your app directly from the dashboard.",
-      logoSrc: "/integrations/vercel.svg",
+      logoSrc: "/vercel-logo.svg",
       logoAlt: "Vercel logo",
     },
     {

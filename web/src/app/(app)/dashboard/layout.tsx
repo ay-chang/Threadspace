@@ -3,6 +3,7 @@ import AppSidebar from "@/components/sidebar/AppSidebar";
 import AppHeader from "@/components/AppHeader";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
+import { fetchProjects } from "@/lib/projects";
 import ClientProviders from "./clientProviders";
 import { redirect } from "next/navigation";
 
@@ -19,11 +20,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         redirect("/login");
     }
 
+    const projects = await fetchProjects();
+
     return (
         <div className="[--header-height:calc(--spacing(14))]">
             <ClientProviders session={session}>
                 <main className="flex flex-1">
-                    <AppSidebar />
+                    <AppSidebar projects={projects} />
                     <SidebarInset>
                         <AppHeader />
                         {children}
