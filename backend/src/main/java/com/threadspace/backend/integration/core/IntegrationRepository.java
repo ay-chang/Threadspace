@@ -8,4 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface IntegrationRepository extends JpaRepository<Integration, UUID> {
 
     List<Integration> findByProjectId(UUID projectId);
+
+    List<Integration> findByProjectIdAndIntegrationType(UUID projectId, IntegrationType integrationType);
 }

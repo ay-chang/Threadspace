@@ -50,6 +50,7 @@ public class VercelIntegrationProvider implements IntegrationProvider {
 
         String apiToken = credentials.get("apiToken");
         String projectName = credentials.get("projectName");
+        String teamId = credentials.get("teamId");
 
         if (apiToken == null || apiToken.isBlank()) {
             throw new IllegalArgumentException("Vercel apiToken is required");
@@ -70,7 +71,8 @@ public class VercelIntegrationProvider implements IntegrationProvider {
         // 2) Serialize secrets as JSON
         VercelSecretPayload payload = new VercelSecretPayload(
                 apiToken.trim(),
-                projectName.trim());
+                projectName.trim(),
+                teamId != null && !teamId.isBlank() ? teamId.trim() : null);
 
         String json;
         try {
