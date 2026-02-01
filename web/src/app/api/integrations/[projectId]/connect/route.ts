@@ -39,8 +39,31 @@ export async function POST(
 
         if (!res.ok) {
             const text = await res.text()
+
+            // Try to parse backend error and provide user-friendly message
+            let errorMessage = "Failed to connect integration"
+            try {
+                const errorData = JSON.parse(text)
+                if (errorData.error || errorData.message) {
+                    // Check for common error patterns
+                    const backendError = errorData.error || errorData.message
+                    if (backendError.includes("credentials") || backendError.includes("authentication") || backendError.includes("access")) {
+                        errorMessage = "Invalid credentials. Please check your access keys and try again."
+                    } else {
+                        errorMessage = backendError
+                    }
+                }
+            } catch {
+                // If not JSON or parsing fails, check text for credential errors
+                if (text.includes("credentials") || text.includes("authentication") || text.includes("access")) {
+                    errorMessage = "Invalid credentials. Please check your access keys and try again."
+                } else if (text) {
+                    errorMessage = text
+                }
+            }
+
             return NextResponse.json(
-                { error: text || "Failed to connect integration" },
+                { error: errorMessage },
                 { status: res.status }
             )
         }

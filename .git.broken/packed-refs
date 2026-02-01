@@ -1,0 +1,6 @@
+# pack-refs with: peeled fully-peeled sorted 
+1a37bcf690f218ed910d664e23ab59d6f2caad1d refs/remotes/origin/AWSIntegration
+cccb38af40166456c22de0db1663bd8033015313 refs/remotes/origin/display-aws-db-data
+b51d7df9a7c116465c793b8b5db6512ecc2a0508 refs/remotes/origin/integrations
+b65b46956aef6c18fb2ba3fe5572e2129ec99ec6 refs/remotes/origin/main
+445fe3f76c05cdf901d4a20e395e5aa099f94ebf refs/remotes/origin/vercel-integration

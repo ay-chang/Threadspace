@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import IntegrationCard from "@/components/dashboard/IntegrationCard";
 import IntegrationTabs from "./IntegrationTabs";
@@ -65,7 +66,13 @@ export default async function Integrations({ params }: PageProps) {
                             <div className="text-sm font-medium">{info.name}</div>
                             <div className="text-xs text-muted-foreground truncate">{info.description}</div>
                         </div>
-                        <Button variant="outline" size="sm">Manage</Button>
+                        <Link href={
+                            integration.integrationType === "AWS"
+                                ? `/dashboard/projects/${projectId}/integrations/aws/services`
+                                : `/dashboard/projects/${projectId}/integrations`
+                        }>
+                            <Button variant="outline" size="sm">Manage</Button>
+                        </Link>
                     </div>
                 );
             })}
