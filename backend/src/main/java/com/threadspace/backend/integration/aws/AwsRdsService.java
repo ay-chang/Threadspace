@@ -14,6 +14,7 @@ import com.threadspace.backend.integration.core.IntegrationSecretRepository;
 import com.threadspace.backend.integration.core.IntegrationStatus;
 import com.threadspace.backend.integration.core.IntegrationType;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
@@ -42,6 +43,7 @@ public class AwsRdsService {
         this.objectMapper = objectMapper;
     }
 
+    @Transactional(readOnly = true)
     public List<RdsInstanceInfo> getRdsInstances(UUID projectId) {
         AwsSecretPayload credentials = getAwsCredentials(projectId);
 
@@ -67,6 +69,7 @@ public class AwsRdsService {
         }
     }
 
+    @Transactional(readOnly = true)
     public RdsMetrics getRdsMetrics(UUID projectId) {
         AwsSecretPayload credentials = getAwsCredentials(projectId);
 

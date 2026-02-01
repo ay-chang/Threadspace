@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import IntegrationCard from "@/components/dashboard/IntegrationCard";
 import { AwsConnectionModal } from "@/components/dashboard/AwsConnectionModal";
@@ -30,13 +30,7 @@ export default function Integrations({
         params.then((p) => setProjectId(p.projectId));
     }, [params]);
 
-    useEffect(() => {
-        if (projectId) {
-            fetchIntegrations();
-        }
-    }, [projectId]);
-
-    const fetchIntegrations = async () => {
+    const fetchIntegrations = useCallback(async () => {
         if (!projectId) return;
 
         setIsLoading(true);
@@ -51,7 +45,11 @@ export default function Integrations({
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [projectId]);
+
+    useEffect(() => {
+        fetchIntegrations();
+    }, [fetchIntegrations]);
 
     const handleAwsConnect = () => {
         setAwsModalOpen(true);

@@ -1,37 +1,25 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MetricCard } from "@/components/dashboard/MetricCard";
-import { TimeSeriesChart } from "@/components/dashboard/TimeSeriesChart";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Database, Activity, HardDrive, Network } from "lucide-react";
+import { Database, Activity, HardDrive } from "lucide-react";
 
-type RdsInstance = {
-    instanceId: string;
-    instanceClass: string;
-    engine: string;
-    status: string;
-    storageGB: number;
-    multiAz: boolean;
-    availabilityZone: string;
+type S3BucketInfo = {
+    name: string;
+    creationDate: string;
+    objectCount: number;
+    sizeBytes: number;
+    region: string;
 };
 
-type MetricDataPoint = {
-    timestamp: string;
-    value: number;
-};
-
-type RdsMetrics = {
-    totalDatabases: number;
-    activeConnections: number;
-    storageUsedGB: number;
-    avgCpuUtilization: number;
-    cpuData: MetricDataPoint[];
-    connectionsData: MetricDataPoint[];
-    readIopsData: MetricDataPoint[];
-    writeIopsData: MetricDataPoint[];
+type S3Metrics = {
+    totalBuckets: number;
+    totalObjects: number;
+    totalStorageGB: number;
+    buckets: S3BucketInfo[];
 };
 
 export default function DatabasePage({
@@ -40,8 +28,7 @@ export default function DatabasePage({
     params: Promise<{ projectId: string }>;
 }) {
     const [projectId, setProjectId] = useState<string>("");
-    const [instances, setInstances] = useState<RdsInstance[]>([]);
-    const [metrics, setMetrics] = useState<RdsMetrics | null>(null);
+    const [metrics, setMetrics] = useState<S3Metrics | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -49,85 +36,48 @@ export default function DatabasePage({
         params.then((p) => setProjectId(p.projectId));
     }, [params]);
 
-    useEffect(() => {
-        if (projectId) {
-            fetchData();
-        }
-    }, [projectId]);
+    const fetchData = useCallback(async () => {
+        if (!projectId) return;
 
-    const fetchData = async () => {
         setIsLoading(true);
         setError(null);
 
         try {
-            const [instancesRes, metricsRes] = await Promise.all([
-                fetch(`/api/projects/${projectId}/aws/rds/instances`),
-                fetch(`/api/projects/${projectId}/aws/rds/metrics`),
-            ]);
+            const metricsRes = await fetch(`/api/projects/${projectId}/aws/s3/metrics`);
 
-            if (!instancesRes.ok || !metricsRes.ok) {
-                const errorMsg = !instancesRes.ok
-                    ? await instancesRes.text()
-                    : await metricsRes.text();
-                throw new Error(errorMsg || "Failed to fetch RDS data");
+            if (!metricsRes.ok) {
+                const errorMsg = await metricsRes.text();
+                throw new Error(errorMsg || "Failed to fetch S3 data");
             }
 
-            const instancesData = await instancesRes.json();
             const metricsData = await metricsRes.json();
-
-            setInstances(instancesData);
             setMetrics(metricsData);
         } catch (err) {
-            console.error("Failed to fetch RDS data:", err);
+            console.error("Failed to fetch S3 data:", err);
             setError(err instanceof Error ? err.message : "Failed to fetch AWS data");
         } finally {
             setIsLoading(false);
         }
+    }, [projectId]);
+
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
+
+    const formatBytes = (bytes: number) => {
+        if (bytes === 0) return "0 Bytes";
+        const k = 1024;
+        const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
     };
-
-    const getStatusBadge = (status: string) => {
-        const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-            available: "default",
-            "backing-up": "secondary",
-            maintenance: "outline",
-        };
-        return (
-            <Badge variant={variants[status] || "default"} className="capitalize">
-                {status}
-            </Badge>
-        );
-    };
-
-    const formatTimestamp = (timestamp: string) => {
-        const date = new Date(timestamp);
-        return date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
-    };
-
-    // Transform metrics data for charts
-    const cpuChartData = metrics?.cpuData.map((d) => ({
-        timestamp: formatTimestamp(d.timestamp),
-        cpu: Math.round(d.value * 100) / 100,
-    })) || [];
-
-    const connectionsChartData = metrics?.connectionsData.map((d) => ({
-        timestamp: formatTimestamp(d.timestamp),
-        connections: Math.round(d.value),
-    })) || [];
-
-    const iopsChartData = metrics
-        ? metrics.readIopsData.map((d, i) => ({
-              timestamp: formatTimestamp(d.timestamp),
-              read: Math.round(d.value),
-              write: Math.round(metrics.writeIopsData[i]?.value || 0),
-          }))
-        : [];
 
     if (isLoading) {
         return (
             <div className="w-full px-4 sm:px-6 lg:px-10 py-6">
                 <div className="mb-6">
-                    <h1 className="text-2xl font-semibold">Database Dashboard</h1>
-                    <p className="text-sm text-gray-500">Loading AWS RDS data...</p>
+                    <h1 className="text-2xl font-semibold">S3 Storage Dashboard</h1>
+                    <p className="text-sm text-gray-500">Loading AWS S3 data...</p>
                 </div>
             </div>
         );
@@ -137,7 +87,7 @@ export default function DatabasePage({
         return (
             <div className="w-full px-4 sm:px-6 lg:px-10 py-6">
                 <div className="mb-6">
-                    <h1 className="text-2xl font-semibold">Database Dashboard</h1>
+                    <h1 className="text-2xl font-semibold">S3 Storage Dashboard</h1>
                     <p className="text-sm text-red-500">{error}</p>
                     <p className="text-xs text-gray-500 mt-2">
                         Make sure you have connected your AWS integration with valid credentials.
@@ -151,9 +101,9 @@ export default function DatabasePage({
         <div className="w-full px-4 sm:px-6 lg:px-10 py-6">
             {/* Header */}
             <div className="mb-6">
-                <h1 className="text-2xl font-semibold">Database Dashboard</h1>
+                <h1 className="text-2xl font-semibold">S3 Storage Dashboard</h1>
                 <p className="text-sm text-gray-500">
-                    Monitor your AWS RDS database instances and performance metrics
+                    Monitor your AWS S3 buckets and storage metrics
                 </p>
             </div>
 
@@ -162,150 +112,72 @@ export default function DatabasePage({
                 <Tabs defaultValue="overview" className="w-full">
                     <TabsList className="mb-6">
                         <TabsTrigger value="overview">Overview</TabsTrigger>
-                        <TabsTrigger value="instances">Instances</TabsTrigger>
-                        <TabsTrigger value="performance">Performance</TabsTrigger>
+                        <TabsTrigger value="buckets">Buckets</TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="overview">
                         <div className="space-y-6">
                             {/* Metric Cards Row */}
-                            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                                 <MetricCard
-                                    title="Total Databases"
-                                    value={metrics?.totalDatabases || 0}
+                                    title="Total Buckets"
+                                    value={metrics?.totalBuckets || 0}
                                     icon={<Database className="h-4 w-4" />}
                                 />
                                 <MetricCard
-                                    title="Active Connections"
-                                    value={metrics?.activeConnections || 0}
+                                    title="Total Objects"
+                                    value={metrics?.totalObjects || 0}
                                     icon={<Activity className="h-4 w-4" />}
                                 />
                                 <MetricCard
-                                    title="Storage Used"
-                                    value={`${metrics?.storageUsedGB || 0} GB`}
+                                    title="Total Storage"
+                                    value={`${Math.round((metrics?.totalStorageGB || 0) * 100) / 100} GB`}
                                     icon={<HardDrive className="h-4 w-4" />}
                                 />
-                                <MetricCard
-                                    title="Avg CPU Utilization"
-                                    value={`${Math.round(metrics?.avgCpuUtilization || 0)}%`}
-                                    icon={<Network className="h-4 w-4" />}
-                                />
                             </div>
-
-                            {/* Charts Section */}
-                            <div className="grid gap-6 md:grid-cols-2">
-                                <TimeSeriesChart
-                                    title="CPU Utilization"
-                                    description="Last 24 hours"
-                                    data={cpuChartData}
-                                    dataKeys={[{ key: "cpu", label: "CPU %", color: "#3b82f6" }]}
-                                    yAxisLabel="CPU %"
-                                />
-                                <TimeSeriesChart
-                                    title="Database Connections"
-                                    description="Last 24 hours"
-                                    data={connectionsChartData}
-                                    dataKeys={[{ key: "connections", label: "Connections", color: "#10b981" }]}
-                                    yAxisLabel="Count"
-                                />
-                            </div>
-
-                            <div className="grid gap-6 md:grid-cols-2">
-                                <TimeSeriesChart
-                                    title="IOPS (Input/Output Operations)"
-                                    description="Last 24 hours"
-                                    data={iopsChartData}
-                                    dataKeys={[
-                                        { key: "read", label: "Read IOPS", color: "#8b5cf6" },
-                                        { key: "write", label: "Write IOPS", color: "#f59e0b" },
-                                    ]}
-                                    yAxisLabel="IOPS"
-                                />
                         </div>
                     </TabsContent>
 
-                    <TabsContent value="instances">
+                    <TabsContent value="buckets">
                         <div className="rounded-2xl border bg-white shadow-sm">
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead>Instance ID</TableHead>
-                                        <TableHead>Name</TableHead>
-                                        <TableHead>Engine</TableHead>
-                                        <TableHead>Status</TableHead>
-                                        <TableHead>Size</TableHead>
-                                        <TableHead>Storage</TableHead>
-                                        <TableHead>Multi-AZ</TableHead>
-                                        <TableHead className="text-right">Connections</TableHead>
+                                        <TableHead>Bucket Name</TableHead>
+                                        <TableHead>Region</TableHead>
+                                        <TableHead>Created</TableHead>
+                                        <TableHead>Object Count</TableHead>
+                                        <TableHead className="text-right">Size</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {instances.length === 0 ? (
+                                    {metrics?.buckets.length === 0 ? (
                                         <TableRow>
-                                            <TableCell colSpan={8} className="text-center text-gray-500">
-                                                No RDS instances found
+                                            <TableCell colSpan={5} className="text-center text-gray-500">
+                                                No S3 buckets found
                                             </TableCell>
                                         </TableRow>
                                     ) : (
-                                        instances.map((instance) => (
-                                            <TableRow key={instance.instanceId}>
+                                        metrics?.buckets.map((bucket) => (
+                                            <TableRow key={bucket.name}>
                                                 <TableCell className="font-mono text-sm">
-                                                    {instance.instanceId}
+                                                    {bucket.name}
                                                 </TableCell>
-                                                <TableCell className="font-medium">
-                                                    {instance.instanceId}
-                                                </TableCell>
-                                                <TableCell>{instance.engine}</TableCell>
-                                                <TableCell>{getStatusBadge(instance.status)}</TableCell>
-                                                <TableCell>{instance.instanceClass}</TableCell>
-                                                <TableCell>{instance.storageGB} GB</TableCell>
                                                 <TableCell>
-                                                    <Badge variant={instance.multiAz ? "default" : "outline"}>
-                                                        {instance.multiAz ? "Yes" : "No"}
-                                                    </Badge>
+                                                    <Badge variant="outline">{bucket.region}</Badge>
                                                 </TableCell>
+                                                <TableCell>
+                                                    {bucket.creationDate ? new Date(bucket.creationDate).toLocaleDateString() : "N/A"}
+                                                </TableCell>
+                                                <TableCell>{bucket.objectCount.toLocaleString()}</TableCell>
                                                 <TableCell className="text-right">
-                                                    {instance.availabilityZone}
+                                                    {formatBytes(bucket.sizeBytes)}
                                                 </TableCell>
                                             </TableRow>
                                         ))
                                     )}
                                 </TableBody>
                             </Table>
-                        </div>
-                    </TabsContent>
-
-                    <TabsContent value="performance">
-                        <div className="space-y-6">
-                            <div className="grid gap-6 md:grid-cols-2">
-                                <TimeSeriesChart
-                                    title="CPU Utilization Over Time"
-                                    description="Detailed CPU metrics"
-                                    data={cpuChartData}
-                                    dataKeys={[{ key: "cpu", label: "CPU %", color: "#3b82f6" }]}
-                                    yAxisLabel="CPU %"
-                                    height={350}
-                                />
-                                <TimeSeriesChart
-                                    title="Database Connections Over Time"
-                                    description="Connection pool usage"
-                                    data={connectionsChartData}
-                                    dataKeys={[{ key: "connections", label: "Active Connections", color: "#10b981" }]}
-                                    yAxisLabel="Connections"
-                                    height={350}
-                                />
-                            </div>
-                            <TimeSeriesChart
-                                title="Read vs Write IOPS"
-                                description="Input/Output operations per second"
-                                data={iopsChartData}
-                                dataKeys={[
-                                    { key: "read", label: "Read IOPS", color: "#8b5cf6" },
-                                    { key: "write", label: "Write IOPS", color: "#f59e0b" },
-                                ]}
-                                yAxisLabel="IOPS"
-                                height={350}
-                            />
                         </div>
                     </TabsContent>
                 </Tabs>
