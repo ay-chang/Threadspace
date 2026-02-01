@@ -7,6 +7,7 @@ import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
+    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
@@ -47,6 +48,12 @@ export default function ProjectSwitcher({
                         className="w-(--radix-dropdown-menu-trigger-width)"
                         align="start"
                     >
+                        <DropdownMenuItem
+                            onSelect={() => router.push("/dashboard/projects")}
+                        >
+                            All Projects
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
                         {projects.length === 0 ? (
                             <DropdownMenuItem disabled>No projects yet</DropdownMenuItem>
                         ) : (
