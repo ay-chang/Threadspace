@@ -8,13 +8,16 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import Link from "next/link";
 
 type IntegrationCardProps = {
+    id: string;
     name: string;
     description: string;
     logoSrc: string;
     logoAlt: string;
     connected?: boolean;
+    href?: string;
 };
 
 export default function IntegrationCard({
@@ -23,6 +26,7 @@ export default function IntegrationCard({
     logoSrc,
     logoAlt,
     connected = false,
+    href,
 }: IntegrationCardProps) {
     return (
         <Card className="flex flex-col rounded-2xl border bg-white shadow-sm">
@@ -50,8 +54,16 @@ export default function IntegrationCard({
             <CardContent className="flex-1" />
 
             <CardFooter className="mt-auto">
-                <Button variant={connected ? "outline" : "default"} className="w-full text-sm">
-                    {connected ? "Manage" : "Connect"}
+                <Button
+                    variant={connected ? "outline" : "default"}
+                    className="w-full text-sm"
+                    asChild={!!href}
+                >
+                    {href ? (
+                        <Link href={href}>{connected ? "Manage" : "Connect"}</Link>
+                    ) : (
+                        <>{connected ? "Manage" : "Connect"}</>
+                    )}
                 </Button>
             </CardFooter>
         </Card>

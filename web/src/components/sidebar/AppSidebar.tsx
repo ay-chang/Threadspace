@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 import {
     Sidebar,
@@ -18,66 +19,62 @@ import {
 import { Cable, LayoutDashboard, Settings } from "lucide-react";
 import ProjectSwitcher from "@/components/sidebar/ProjectSwitcher";
 import SidebarOptions from "@/components/sidebar/SidebarOptions";
+import { Project } from "@/lib/projects";
 
-export default function AppSidebar() {
+const NAV_ITEMS = [
+    { icon: LayoutDashboard, label: "Dashboard", path: "dashboard" },
+    { icon: Cable, label: "Integrations", path: "integrations" },
+    { icon: Settings, label: "Settings", path: "settings" },
+];
+
+export default function AppSidebar({ projects }: { projects: Project[] }) {
+    const pathname = usePathname();
+
+    // Extract projectId from /dashboard/projects/{projectId}/...
+    const segments = pathname.split("/");
+    const projectsIdx = segments.indexOf("projects");
+    const projectId = projectsIdx !== -1 && segments[projectsIdx + 1]
+        ? segments[projectsIdx + 1]
+        : null;
+
     return (
         <Sidebar>
-            {/** Sidebar header */}
             <SidebarHeader>
-                <ProjectSwitcher
-                    projects={["Appple Product", "Vercel Project"]}
-                    overview="Overview"
-                />
+                <ProjectSwitcher projects={projects} currentProjectId={projectId} />
             </SidebarHeader>
 
             <SidebarContent>
-                {/** Platform group */}
                 <SidebarGroup>
                     <SidebarGroupLabel>Platform</SidebarGroupLabel>
-                    {/** DashboardsItem */}
                     <SidebarGroupContent>
                         <SidebarMenu>
-                            <SidebarMenuItem>
-                                <SidebarMenuButton asChild>
-                                    <Link href="/">
-                                        <LayoutDashboard />
-                                        <span>Dashboard</span>
-                                    </Link>
-                                </SidebarMenuButton>
-                            </SidebarMenuItem>
-                        </SidebarMenu>
-                    </SidebarGroupContent>
-                    {/** Integrations Item */}
-                    <SidebarGroupContent>
-                        <SidebarMenu>
-                            <SidebarMenuItem>
-                                <SidebarMenuButton asChild>
-                                    <Link href="/">
-                                        <Cable />
-                                        <span>Integrations</span>
-                                    </Link>
-                                </SidebarMenuButton>
-                            </SidebarMenuItem>
-                        </SidebarMenu>
-                    </SidebarGroupContent>
-
-                    {/** Settings Item */}
-                    <SidebarGroupContent>
-                        <SidebarMenu>
-                            <SidebarMenuItem>
-                                <SidebarMenuButton asChild>
-                                    <Link href="/">
-                                        <Settings />
-                                        <span>Settings</span>
-                                    </Link>
-                                </SidebarMenuButton>
-                            </SidebarMenuItem>
+                            {NAV_ITEMS.map(({ icon: Icon, label, path }) => {
+                                const href = projectId
+                                    ? `/dashboard/projects/${projectId}/${path}`
+                                    : null;
+                                return (
+                                    <SidebarMenuItem key={label}>
+                                        <SidebarMenuButton asChild={!!href} disabled={!href}>
+                                            {href ? (
+                                                <Link href={href}>
+                                                    <Icon />
+                                                    <span>{label}</span>
+                                                </Link>
+                                            ) : (
+                                                <>
+                                                    <Icon />
+                                                    <span>{label}</span>
+                                                </>
+                                            )}
+                                        </SidebarMenuButton>
+                                    </SidebarMenuItem>
+                                );
+                            })}
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>
             </SidebarContent>
 
-            {/** Sidebar Footer */}
             <SidebarFooter>
                 <SidebarOptions />
             </SidebarFooter>
