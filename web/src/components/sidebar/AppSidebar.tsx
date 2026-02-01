@@ -15,7 +15,7 @@ import {
     SidebarMenuItem,
 } from "@/components/ui/sidebar";
 
-import { Cable, LayoutDashboard, Settings } from "lucide-react";
+import { Cable, Database, LayoutDashboard, Settings } from "lucide-react";
 import ProjectSwitcher from "@/components/sidebar/ProjectSwitcher";
 import SidebarOptions from "@/components/sidebar/SidebarOptions";
 
@@ -42,6 +42,19 @@ export default function AppSidebar() {
                                     <Link href="/">
                                         <LayoutDashboard />
                                         <span>Dashboard</span>
+                                    </Link>
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
+                        </SidebarMenu>
+                    </SidebarGroupContent>
+                    {/** Database Item */}
+                    <SidebarGroupContent>
+                        <SidebarMenu>
+                            <SidebarMenuItem>
+                                <SidebarMenuButton asChild>
+                                    <Link href="/">
+                                        <Database />
+                                        <span>Database</span>
                                     </Link>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>

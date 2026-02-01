@@ -15,6 +15,7 @@ type IntegrationCardProps = {
     logoSrc: string;
     logoAlt: string;
     connected?: boolean;
+    onConnect?: () => void;
 };
 
 export default function IntegrationCard({
@@ -23,6 +24,7 @@ export default function IntegrationCard({
     logoSrc,
     logoAlt,
     connected = false,
+    onConnect,
 }: IntegrationCardProps) {
     return (
         <Card className="flex flex-col rounded-2xl border bg-white shadow-sm">
@@ -50,7 +52,11 @@ export default function IntegrationCard({
             <CardContent className="flex-1" />
 
             <CardFooter className="mt-auto">
-                <Button variant={connected ? "outline" : "default"} className="w-full text-sm">
+                <Button
+                    variant={connected ? "outline" : "default"}
+                    className="w-full text-sm"
+                    onClick={onConnect}
+                >
                     {connected ? "Manage" : "Connect"}
                 </Button>
             </CardFooter>
