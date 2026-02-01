@@ -1,5 +1,6 @@
 package com.threadspace.backend.integration.vercel;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import java.util.List;
 
 public class VercelDtos {
@@ -26,12 +27,24 @@ public class VercelDtos {
     public record VercelEnvResponse(List<VercelEnvVar> envs) {
     }
 
+    public record VercelDeployment(
+            @JsonAlias("uid") String id,
+            String url,
+            String state,
+            String target,
+            Long createdAt) {
+    }
+
+    public record VercelDeploymentsResponse(List<VercelDeployment> deployments) {
+    }
+
     public record ProjectSummary(
             String id,
             String name,
             String framework,
             String repo,
             List<VercelDomain> domains,
-            List<VercelEnvVar> envs) {
+            List<VercelEnvVar> envs,
+            List<VercelDeployment> deployments) {
     }
 }

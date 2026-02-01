@@ -10,4 +10,9 @@ public interface IntegrationProvider {
     Integration connect(UUID projectId,
             String displayName,
             Map<String, String> credentials);
+
+    Integration update(UUID projectId,
+            Map<String, String> credentials);
+
+    Map<String, String> getDisplayCredentials(UUID projectId);
 }
