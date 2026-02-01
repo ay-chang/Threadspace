@@ -66,11 +66,13 @@ export default async function Integrations({ params }: PageProps) {
                             <div className="text-sm font-medium">{info.name}</div>
                             <div className="text-xs text-muted-foreground truncate">{info.description}</div>
                         </div>
-                        <Button variant="outline" size="sm" asChild>
-                            <Link href={`/dashboard/projects/${projectId}/integrations/manage/${integration.integrationType.toLowerCase()}`}>
-                                Manage
-                            </Link>
-                        </Button>
+                        <Link href={
+                            integration.integrationType === "AWS"
+                                ? `/dashboard/projects/${projectId}/integrations/aws/services`
+                                : `/dashboard/projects/${projectId}/integrations`
+                        }>
+                            <Button variant="outline" size="sm">Manage</Button>
+                        </Link>
                     </div>
                 );
             })}

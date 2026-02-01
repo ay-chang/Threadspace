@@ -7,6 +7,13 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import {
     Field,
     FieldDescription,
     FieldError,
@@ -121,16 +128,38 @@ export default function ConnectIntegrationPage() {
                                     {section.fields.map((field) => (
                                         <Field key={field.key}>
                                             <FieldLabel>{field.label}</FieldLabel>
-                                            <Input
-                                                type={field.type || "text"}
-                                                placeholder={field.placeholder}
-                                                value={values[field.key] || ""}
-                                                onChange={(e) =>
-                                                    handleChange(field.key, e.target.value)
-                                                }
-                                                required={field.required}
-                                                disabled={loading}
-                                            />
+                                            {field.type === "select" ? (
+                                                <Select
+                                                    value={values[field.key] || ""}
+                                                    onValueChange={(value) =>
+                                                        handleChange(field.key, value)
+                                                    }
+                                                    required={field.required}
+                                                    disabled={loading}
+                                                >
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder={field.placeholder || "Select..."} />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {field.options?.map((option) => (
+                                                            <SelectItem key={option.value} value={option.value}>
+                                                                {option.label}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            ) : (
+                                                <Input
+                                                    type={field.type || "text"}
+                                                    placeholder={field.placeholder}
+                                                    value={values[field.key] || ""}
+                                                    onChange={(e) =>
+                                                        handleChange(field.key, e.target.value)
+                                                    }
+                                                    required={field.required}
+                                                    disabled={loading}
+                                                />
+                                            )}
                                         </Field>
                                     ))}
                                 </FieldSet>
