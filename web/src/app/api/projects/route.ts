@@ -75,7 +75,7 @@ export async function GET() {
     }
     if (!(session.user as any).id) {
         return NextResponse.json(
-            { error: "Unauthorized: missing user id", user: session.user },
+            { error: "Session is missing internal user id. The backend upsert may have failed — check that the backend is running." },
             { status: 401 }
         );
     }
