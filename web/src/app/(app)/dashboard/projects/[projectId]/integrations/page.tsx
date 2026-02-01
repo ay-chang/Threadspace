@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import IntegrationCard from "@/components/dashboard/IntegrationCard";
 import IntegrationTabs from "./IntegrationTabs";
@@ -65,7 +66,11 @@ export default async function Integrations({ params }: PageProps) {
                             <div className="text-sm font-medium">{info.name}</div>
                             <div className="text-xs text-muted-foreground truncate">{info.description}</div>
                         </div>
-                        <Button variant="outline" size="sm">Manage</Button>
+                        <Button variant="outline" size="sm" asChild>
+                            <Link href={`/dashboard/projects/${projectId}/integrations/manage/${integration.integrationType.toLowerCase()}`}>
+                                Manage
+                            </Link>
+                        </Button>
                     </div>
                 );
             })}

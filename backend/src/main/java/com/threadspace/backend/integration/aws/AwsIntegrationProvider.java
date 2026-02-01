@@ -109,6 +109,16 @@ public class AwsIntegrationProvider implements IntegrationProvider {
         return integrationRepository.save(integration);
     }
 
+    @Override
+    public Integration update(UUID projectId, Map<String, String> credentials) {
+        throw new UnsupportedOperationException("AWS update not yet implemented");
+    }
+
+    @Override
+    public Map<String, String> getDisplayCredentials(UUID projectId) {
+        throw new UnsupportedOperationException("AWS getDisplayCredentials not yet implemented");
+    }
+
     private void verifyCredentials(String accessKeyId, String secretAccessKey, String region) {
         AwsBasicCredentials credentials = AwsBasicCredentials.create(accessKeyId, secretAccessKey);
 

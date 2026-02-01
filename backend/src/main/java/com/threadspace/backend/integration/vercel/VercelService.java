@@ -71,6 +71,12 @@ public class VercelService {
                                 teamId,
                                 VercelEnvResponse.class);
 
+                VercelDeploymentsResponse deploymentsResponse = vercelApiClient.get(
+                                "/v6/deployments?projectId=" + project.id() + "&limit=10",
+                                payload.apiToken(),
+                                teamId,
+                                VercelDeploymentsResponse.class);
+
                 return new ProjectSummary(
                                 project.id(),
                                 project.name(),
@@ -79,6 +85,9 @@ public class VercelService {
                                 domainsResponse != null && domainsResponse.domains() != null ? domainsResponse.domains()
                                                 : Collections.emptyList(),
                                 envResponse != null && envResponse.envs() != null ? envResponse.envs()
+                                                : Collections.emptyList(),
+                                deploymentsResponse != null && deploymentsResponse.deployments() != null
+                                                ? deploymentsResponse.deployments()
                                                 : Collections.emptyList());
         }
 }

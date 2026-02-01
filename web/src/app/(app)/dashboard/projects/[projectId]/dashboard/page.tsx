@@ -1,8 +1,12 @@
 import { fetchProjects } from "@/lib/projects";
+import DashboardWidgets from "./DashboardWidgets";
 
 type PageProps = {
     params: Promise<{ projectId: string }>;
 };
+
+const BACKEND_BASE = process.env.BACKEND_BASE!;
+const INTERNAL_SYNC_TOKEN = process.env.INTERNAL_SYNC_TOKEN!;
 
 export default async function ProjectDashboard({ params }: PageProps) {
     const { projectId } = await params;
@@ -20,6 +24,24 @@ export default async function ProjectDashboard({ params }: PageProps) {
         );
     }
 
+    let integrations: { integrationType: string }[] = [];
+    try {
+        const res = await fetch(`${BACKEND_BASE}/projects/${projectId}/integrations`, {
+            headers: { "x-internal-token": INTERNAL_SYNC_TOKEN },
+        });
+        if (res.ok) integrations = await res.json();
+    } catch {}
+
+    const integrationData: Record<string, unknown> = {};
+    if (integrations.some((i) => i.integrationType === "VERCEL")) {
+        try {
+            const res = await fetch(`${BACKEND_BASE}/projects/${projectId}/vercel/summary`, {
+                headers: { "x-internal-token": INTERNAL_SYNC_TOKEN },
+            });
+            if (res.ok) integrationData.vercel = await res.json();
+        } catch {}
+    }
+
     return (
         <div className="flex flex-col gap-6 p-6">
             <div className="flex flex-col gap-1">
@@ -27,18 +49,7 @@ export default async function ProjectDashboard({ params }: PageProps) {
                 <p className="text-sm text-muted-foreground">Dashboard</p>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                {["Database", "Auth", "Storage", "Realtime"].map((section) => (
-                    <div
-                        key={section}
-                        className="border-border/60 bg-muted/20 text-muted-foreground flex min-h-[220px] flex-col rounded-lg border p-4"
-                    >
-                        <div className="text-sm font-semibold text-foreground">{section}</div>
-                        <div className="mt-2 text-xs">No data to show</div>
-                        <div className="mt-auto h-24 rounded-md border border-dashed border-border/60 bg-muted/40" />
-                    </div>
-                ))}
-            </div>
+            <DashboardWidgets projectId={projectId} integrationData={integrationData} />
         </div>
     );
 }
