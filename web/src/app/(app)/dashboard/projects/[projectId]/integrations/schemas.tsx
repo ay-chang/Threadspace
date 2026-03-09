@@ -24,6 +24,30 @@ export type IntegrationSchema = {
     sections: SectionDef[];
 };
 
+const GCP_REGIONS = [
+    { value: "us-central1", label: "US Central (Iowa)" },
+    { value: "us-east1", label: "US East (South Carolina)" },
+    { value: "us-east4", label: "US East (N. Virginia)" },
+    { value: "us-west1", label: "US West (Oregon)" },
+    { value: "us-west2", label: "US West (Los Angeles)" },
+    { value: "us-west3", label: "US West (Salt Lake City)" },
+    { value: "us-west4", label: "US West (Las Vegas)" },
+    { value: "europe-west1", label: "Europe West (Belgium)" },
+    { value: "europe-west2", label: "Europe West (London)" },
+    { value: "europe-west3", label: "Europe West (Frankfurt)" },
+    { value: "europe-west4", label: "Europe West (Netherlands)" },
+    { value: "europe-north1", label: "Europe North (Finland)" },
+    { value: "asia-east1", label: "Asia East (Taiwan)" },
+    { value: "asia-east2", label: "Asia East (Hong Kong)" },
+    { value: "asia-northeast1", label: "Asia Northeast (Tokyo)" },
+    { value: "asia-northeast2", label: "Asia Northeast (Osaka)" },
+    { value: "asia-south1", label: "Asia South (Mumbai)" },
+    { value: "asia-southeast1", label: "Asia Southeast (Singapore)" },
+    { value: "asia-southeast2", label: "Asia Southeast (Jakarta)" },
+    { value: "australia-southeast1", label: "Australia Southeast (Sydney)" },
+    { value: "southamerica-east1", label: "South America East (São Paulo)" },
+];
+
 export const INTEGRATION_SCHEMAS: Record<string, IntegrationSchema> = {
     vercel: {
         backendType: "VERCEL",
@@ -154,6 +178,53 @@ export const INTEGRATION_SCHEMAS: Record<string, IntegrationSchema> = {
                         key: "roleArn",
                         label: "Role ARN",
                         placeholder: "arn:aws:iam::123456789:role/...",
+                    },
+                ],
+            },
+        ],
+    },
+    gcp: {
+        backendType: "GOOGLE_CLOUD",
+        name: "Google Cloud",
+        logo: "/integrations/gcp.svg",
+        logoAlt: "Google Cloud logo",
+        displayNameField: "projectId",
+        sections: [
+            {
+                legend: "Connect Google Cloud",
+                description: (
+                    <>
+                        Enter your Google Cloud service account credentials to connect this
+                        project. You can create a service account key in the{" "}
+                        <a
+                            href="https://console.cloud.google.com/iam-admin/serviceaccounts"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            GCP IAM Console
+                        </a>
+                        .
+                    </>
+                ),
+                fields: [
+                    {
+                        key: "projectId",
+                        label: "Project ID",
+                        placeholder: "my-gcp-project",
+                        required: true,
+                    },
+                    {
+                        key: "clientEmail",
+                        label: "Client Email",
+                        placeholder: "service-account@project.iam.gserviceaccount.com",
+                        required: true,
+                    },
+                    {
+                        key: "privateKey",
+                        label: "Private Key",
+                        placeholder: "-----BEGIN PRIVATE KEY-----",
+                        required: true,
+                        type: "password",
                     },
                 ],
             },

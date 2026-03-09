@@ -69,6 +69,8 @@ export default async function Integrations({ params }: PageProps) {
                         <Link href={
                             integration.integrationType === "AWS"
                                 ? `/dashboard/projects/${projectId}/integrations/aws/services`
+                                : integration.integrationType === "GOOGLE_CLOUD"
+                                ? `/dashboard/projects/${projectId}/integrations/gcp/services`
                                 : `/dashboard/projects/${projectId}/integrations`
                         }>
                             <Button variant="outline" size="sm">Manage</Button>
