@@ -106,6 +106,21 @@ public class GcpIntegrationProvider implements IntegrationProvider {
     }
 
     /**
+     * Not implemented, matching AwsIntegrationProvider. The manage/update screen
+     * is Vercel-only today and nothing links to it, so there is no exercised path
+     * here to support yet.
+     */
+    @Override
+    public Integration update(UUID projectId, Map<String, String> credentials) {
+        throw new UnsupportedOperationException("Google Cloud update not yet implemented");
+    }
+
+    @Override
+    public Map<String, String> getDisplayCredentials(UUID projectId) {
+        throw new UnsupportedOperationException("Google Cloud getDisplayCredentials not yet implemented");
+    }
+
+    /**
      * Validates the pasted key file and pulls out the fields worth storing
      * alongside it. Rejects anything missing a field the Google auth library
      * needs, so the user gets a message naming the field rather than a parser

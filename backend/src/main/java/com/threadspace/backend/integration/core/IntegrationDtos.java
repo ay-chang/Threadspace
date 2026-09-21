@@ -17,6 +17,11 @@ public class IntegrationDtos {
                         Map<String, String> credentials) {
         }
 
+        public record IntegrationUpdateRequest(
+                        IntegrationType integrationType,
+                        Map<String, String> credentials) {
+        }
+
         public record IntegrationResponse(
                         UUID id,
                         UUID projectId,

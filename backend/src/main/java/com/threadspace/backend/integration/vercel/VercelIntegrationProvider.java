@@ -1,5 +1,6 @@
 package com.threadspace.backend.integration.vercel;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -95,5 +96,79 @@ public class VercelIntegrationProvider implements IntegrationProvider {
 
         integration.setIntegrationStatus(IntegrationStatus.CONNECTED);
         return integrationRepository.save(integration);
+    }
+
+    @Override
+    @Transactional
+    public Integration update(UUID projectId, Map<String, String> credentials) {
+        Integration integration = integrationRepository
+                .findByProjectIdAndIntegrationType(projectId, IntegrationType.VERCEL)
+                .stream().findFirst()
+                .orElseThrow(() -> new IllegalStateException("No Vercel integration found for project"));
+
+        IntegrationSecret secret = integrationSecretRepository
+                .findByIntegrationId(integration.getId())
+                .orElseThrow(() -> new IllegalStateException("No secret found for integration"));
+
+        VercelSecretPayload current;
+        try {
+            current = objectMapper.readValue(secret.getSecretJson(), VercelSecretPayload.class);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to deserialize current Vercel secrets", e);
+        }
+
+        String apiToken = credentials.get("apiToken");
+        String projectName = credentials.get("projectName");
+        String teamId = credentials.get("teamId");
+
+        VercelSecretPayload updated = new VercelSecretPayload(
+                apiToken != null && !apiToken.isBlank() ? apiToken.trim() : current.apiToken(),
+                projectName != null && !projectName.isBlank() ? projectName.trim() : current.projectName(),
+                teamId != null && !teamId.isBlank() ? teamId.trim() : current.teamId());
+
+        String json;
+        try {
+            json = objectMapper.writeValueAsString(updated);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Failed to serialize Vercel secrets", e);
+        }
+
+        secret.setSecretJson(json);
+        integrationSecretRepository.save(secret);
+
+        return integration;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Map<String, String> getDisplayCredentials(UUID projectId) {
+        Integration integration = integrationRepository
+                .findByProjectIdAndIntegrationType(projectId, IntegrationType.VERCEL)
+                .stream().findFirst()
+                .orElseThrow(() -> new IllegalStateException("No Vercel integration found for project"));
+
+        IntegrationSecret secret = integrationSecretRepository
+                .findByIntegrationId(integration.getId())
+                .orElseThrow(() -> new IllegalStateException("No secret found for integration"));
+
+        VercelSecretPayload payload;
+        try {
+            payload = objectMapper.readValue(secret.getSecretJson(), VercelSecretPayload.class);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to deserialize Vercel secrets", e);
+        }
+
+        Map<String, String> result = new LinkedHashMap<>();
+        result.put("apiToken", mask(payload.apiToken()));
+        result.put("projectName", payload.projectName());
+        if (payload.teamId() != null) {
+            result.put("teamId", payload.teamId());
+        }
+        return result;
+    }
+
+    private String mask(String value) {
+        if (value == null || value.length() < 4) return "****";
+        return "****" + value.substring(value.length() - 4);
     }
 }

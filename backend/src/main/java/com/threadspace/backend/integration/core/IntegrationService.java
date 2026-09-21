@@ -96,4 +96,39 @@ public class IntegrationService {
         integrationRepository.delete(integration);
     }
 
+    public Integration updateIntegration(
+            UUID projectId,
+            IntegrationType type,
+            Map<String, String> credentials) {
+        if (projectId == null) {
+            throw new IllegalArgumentException("projectId must not be null");
+        }
+        if (type == null) {
+            throw new IllegalArgumentException("integration type must not be null");
+        }
+
+        IntegrationProvider provider = providerByType.get(type);
+        if (provider == null) {
+            throw new IllegalStateException("No provider registered for type: " + type);
+        }
+
+        return provider.update(projectId, credentials);
+    }
+
+    public Map<String, String> getDisplayCredentials(UUID projectId, IntegrationType type) {
+        if (projectId == null) {
+            throw new IllegalArgumentException("projectId must not be null");
+        }
+        if (type == null) {
+            throw new IllegalArgumentException("integration type must not be null");
+        }
+
+        IntegrationProvider provider = providerByType.get(type);
+        if (provider == null) {
+            throw new IllegalStateException("No provider registered for type: " + type);
+        }
+
+        return provider.getDisplayCredentials(projectId);
+    }
+
 }
