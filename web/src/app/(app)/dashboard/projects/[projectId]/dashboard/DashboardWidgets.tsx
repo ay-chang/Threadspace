@@ -35,6 +35,9 @@ export default function DashboardWidgets({ projectId, integrationData }: Props) 
             const stored = localStorage.getItem(getStorageKey(projectId, type));
             map[type] = stored ? JSON.parse(stored) : getDefaultEnabled(type);
         }
+        // localStorage is unavailable during SSR, so the stored widget state can
+        // only be read after mount. See react-hooks/set-state-in-effect.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setEnabledMap(map);
     }, [projectId, integrationData]);
 

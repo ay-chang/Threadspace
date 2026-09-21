@@ -32,6 +32,9 @@ export default function ManagePage({ projectId, integrationType, credentials, su
     useEffect(() => {
         const stored = localStorage.getItem(getStorageKey(projectId, integrationType));
         if (stored) {
+            // localStorage is unavailable during SSR, so the stored widget state can
+            // only be read after mount. See react-hooks/set-state-in-effect.
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setEnabled(JSON.parse(stored));
         }
         setInitialized(true);
