@@ -6,29 +6,29 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Database, Activity, HardDrive, TrendingUp } from "lucide-react";
+import { Database, Activity, HardDrive } from "lucide-react";
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 
-type S3BucketInfo = {
+type GcsBucketInfo = {
     name: string;
     creationDate: string;
     objectCount: number;
     sizeBytes: number;
-    region: string;
+    location: string;
 };
 
-type S3Metrics = {
+type StorageMetrics = {
     totalBuckets: number;
     totalObjects: number;
     totalStorageGB: number;
-    buckets: S3BucketInfo[];
+    buckets: GcsBucketInfo[];
 };
 
-const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899"];
+const COLORS = ["#4285f4", "#34a853", "#fbbc05", "#ea4335", "#9334e6", "#ff6d01"];
 
-export default function S3DashboardPage() {
+export default function GcsStorageDashboardPage() {
     const { projectId } = useParams<{ projectId: string }>();
-    const [metrics, setMetrics] = useState<S3Metrics | null>(null);
+    const [metrics, setMetrics] = useState<StorageMetrics | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -39,18 +39,18 @@ export default function S3DashboardPage() {
         setError(null);
 
         try {
-            const metricsRes = await fetch(`/api/projects/${projectId}/aws/s3/metrics`);
+            const metricsRes = await fetch(`/api/projects/${projectId}/gcp/storage/metrics`);
 
             if (!metricsRes.ok) {
                 const errorMsg = await metricsRes.text();
-                throw new Error(errorMsg || "Failed to fetch S3 data");
+                throw new Error(errorMsg || "Failed to fetch Cloud Storage data");
             }
 
             const metricsData = await metricsRes.json();
             setMetrics(metricsData);
         } catch (err) {
-            console.error("Failed to fetch S3 data:", err);
-            setError(err instanceof Error ? err.message : "Failed to fetch AWS data");
+            console.error("Failed to fetch Cloud Storage data:", err);
+            setError(err instanceof Error ? err.message : "Failed to fetch Google Cloud data");
         } finally {
             setIsLoading(false);
         }
@@ -68,7 +68,6 @@ export default function S3DashboardPage() {
         return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
     };
 
-    // Prepare chart data
     const bucketSizeData = metrics?.buckets
         .sort((a, b) => b.sizeBytes - a.sizeBytes)
         .slice(0, 5)
@@ -85,13 +84,13 @@ export default function S3DashboardPage() {
             objects: bucket.objectCount,
         })) || [];
 
-    const regionDistribution = metrics?.buckets.reduce((acc, bucket) => {
-        acc[bucket.region] = (acc[bucket.region] || 0) + 1;
+    const locationDistribution = metrics?.buckets.reduce((acc, bucket) => {
+        acc[bucket.location] = (acc[bucket.location] || 0) + 1;
         return acc;
     }, {} as Record<string, number>) || {};
 
-    const regionData = Object.entries(regionDistribution).map(([region, count]) => ({
-        name: region,
+    const locationData = Object.entries(locationDistribution).map(([location, count]) => ({
+        name: location,
         value: count,
     }));
 
@@ -99,8 +98,8 @@ export default function S3DashboardPage() {
         return (
             <div className="w-full px-4 sm:px-6 lg:px-10 py-6">
                 <div className="mb-6">
-                    <h1 className="text-2xl font-semibold">S3 Storage</h1>
-                    <p className="text-sm text-gray-500">Loading AWS S3 data...</p>
+                    <h1 className="text-2xl font-semibold">Cloud Storage</h1>
+                    <p className="text-sm text-gray-500">Loading Google Cloud Storage data...</p>
                 </div>
             </div>
         );
@@ -110,10 +109,10 @@ export default function S3DashboardPage() {
         return (
             <div className="w-full px-4 sm:px-6 lg:px-10 py-6">
                 <div className="mb-6">
-                    <h1 className="text-2xl font-semibold">S3 Storage</h1>
+                    <h1 className="text-2xl font-semibold">Cloud Storage</h1>
                     <p className="text-sm text-red-500">{error}</p>
                     <p className="text-xs text-gray-500 mt-2">
-                        Make sure you have connected your AWS integration with valid credentials.
+                        Make sure you have connected your Google Cloud integration with valid credentials.
                     </p>
                 </div>
             </div>
@@ -124,9 +123,9 @@ export default function S3DashboardPage() {
         <div className="w-full px-4 sm:px-6 lg:px-10 py-6">
             {/* Header */}
             <div className="mb-6">
-                <h1 className="text-2xl font-semibold">S3 Storage</h1>
+                <h1 className="text-2xl font-semibold">Cloud Storage</h1>
                 <p className="text-sm text-gray-500">
-                    Monitor your AWS S3 buckets and storage metrics
+                    Monitor your Google Cloud Storage buckets and metrics
                 </p>
             </div>
 
@@ -149,7 +148,7 @@ export default function S3DashboardPage() {
                             <CardContent>
                                 <div className="text-2xl font-bold">{metrics?.totalBuckets || 0}</div>
                                 <p className="text-xs text-muted-foreground mt-1">
-                                    Across all regions
+                                    Across all locations
                                 </p>
                             </CardContent>
                         </Card>
@@ -189,7 +188,7 @@ export default function S3DashboardPage() {
                     <Card>
                         <CardHeader>
                             <CardTitle>Top 5 Buckets by Size</CardTitle>
-                            <CardDescription>Largest buckets in your account</CardDescription>
+                            <CardDescription>Largest buckets in your project</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <ResponsiveContainer width="100%" height={300}>
@@ -199,7 +198,7 @@ export default function S3DashboardPage() {
                                     <YAxis label={{ value: "Size (GB)", angle: -90, position: "insideLeft" }} />
                                     <Tooltip />
                                     <Legend />
-                                    <Bar dataKey="size" fill="#3b82f6" name="Size (GB)" />
+                                    <Bar dataKey="size" fill="#4285f4" name="Size (GB)" />
                                 </BarChart>
                             </ResponsiveContainer>
                         </CardContent>
@@ -210,14 +209,14 @@ export default function S3DashboardPage() {
                     <Card>
                         <CardHeader>
                             <CardTitle>All Buckets</CardTitle>
-                            <CardDescription>Complete list of your S3 buckets</CardDescription>
+                            <CardDescription>Complete list of your Cloud Storage buckets</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <Table>
                                 <TableHeader>
                                     <TableRow>
                                         <TableHead>Bucket Name</TableHead>
-                                        <TableHead>Region</TableHead>
+                                        <TableHead>Location</TableHead>
                                         <TableHead>Created</TableHead>
                                         <TableHead>Objects</TableHead>
                                         <TableHead className="text-right">Size</TableHead>
@@ -227,7 +226,7 @@ export default function S3DashboardPage() {
                                     {metrics?.buckets.length === 0 ? (
                                         <TableRow>
                                             <TableCell colSpan={5} className="text-center text-gray-500">
-                                                No S3 buckets found
+                                                No Cloud Storage buckets found
                                             </TableCell>
                                         </TableRow>
                                     ) : (
@@ -237,7 +236,7 @@ export default function S3DashboardPage() {
                                                     {bucket.name}
                                                 </TableCell>
                                                 <TableCell>
-                                                    <Badge variant="outline">{bucket.region}</Badge>
+                                                    <Badge variant="outline">{bucket.location}</Badge>
                                                 </TableCell>
                                                 <TableCell>
                                                     {bucket.creationDate
@@ -259,17 +258,17 @@ export default function S3DashboardPage() {
 
                 <TabsContent value="analytics" className="space-y-6">
                     <div className="grid gap-6 md:grid-cols-2">
-                        {/* Region Distribution */}
+                        {/* Location Distribution */}
                         <Card>
                             <CardHeader>
-                                <CardTitle>Bucket Distribution by Region</CardTitle>
-                                <CardDescription>Number of buckets per region</CardDescription>
+                                <CardTitle>Bucket Distribution by Location</CardTitle>
+                                <CardDescription>Number of buckets per location</CardDescription>
                             </CardHeader>
                             <CardContent>
                                 <ResponsiveContainer width="100%" height={300}>
                                     <PieChart>
                                         <Pie
-                                            data={regionData}
+                                            data={locationData}
                                             cx="50%"
                                             cy="50%"
                                             labelLine={false}
@@ -280,7 +279,7 @@ export default function S3DashboardPage() {
                                             fill="#8884d8"
                                             dataKey="value"
                                         >
-                                            {regionData.map((entry, index) => (
+                                            {locationData.map((entry, index) => (
                                                 <Cell
                                                     key={`cell-${index}`}
                                                     fill={COLORS[index % COLORS.length]}
@@ -307,7 +306,7 @@ export default function S3DashboardPage() {
                                         <YAxis />
                                         <Tooltip />
                                         <Legend />
-                                        <Bar dataKey="objects" fill="#10b981" name="Objects" />
+                                        <Bar dataKey="objects" fill="#34a853" name="Objects" />
                                     </BarChart>
                                 </ResponsiveContainer>
                             </CardContent>

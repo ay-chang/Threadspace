@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.threadspace.backend.integration.core.IntegrationDtos.IntegrationCreateRequest;
 import com.threadspace.backend.integration.core.IntegrationDtos.IntegrationResponse;
 
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -155,6 +156,24 @@ public class IntegrationController {
                 .toList();
 
         return ResponseEntity.ok(responses);
+    }
+
+    @DeleteMapping("/{integrationId}")
+    public ResponseEntity<Void> disconnectIntegration(
+            @PathVariable("projectId") UUID projectId,
+            @PathVariable("integrationId") UUID integrationId,
+            @RequestHeader(name = "x-internal-token", required = false) String token) {
+
+        if (token == null || !token.equals(internalSyncToken)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        try {
+            integrationService.deleteIntegration(projectId, integrationId);
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
 }

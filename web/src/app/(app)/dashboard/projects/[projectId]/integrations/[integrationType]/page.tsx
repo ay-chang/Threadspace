@@ -6,6 +6,7 @@ import Image from "next/image";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import CredentialFileField from "../CredentialFileField";
 import {
     Select,
     SelectContent,
@@ -99,7 +100,7 @@ export default function ConnectIntegrationPage() {
 
     return (
         <div className="flex w-full h-full items-center justify-center p-8">
-            <div className="w-full max-w-md">
+            <div className="w-full min-w-0 max-w-xl">
                 <form onSubmit={handleSubmit}>
                     <FieldGroup>
                         {schema.sections.map((section, sectionIndex) => (
@@ -125,6 +126,16 @@ export default function ConnectIntegrationPage() {
                                         {section.legend}
                                     </FieldLegend>
                                     <FieldDescription>{section.description}</FieldDescription>
+                                    {sectionIndex === 0 && schema.help && (
+                                        <a
+                                            href={schema.help.href}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-primary -mt-1 text-sm font-medium underline underline-offset-4"
+                                        >
+                                            {schema.help.label} →
+                                        </a>
+                                    )}
                                     {section.fields.map((field) => (
                                         <Field key={field.key}>
                                             <FieldLabel>{field.label}</FieldLabel>
@@ -148,6 +159,21 @@ export default function ConnectIntegrationPage() {
                                                         ))}
                                                     </SelectContent>
                                                 </Select>
+                                            ) : field.type === "textarea" ? (
+                                                <CredentialFileField
+                                                    value={values[field.key] || ""}
+                                                    onChange={(value) =>
+                                                        handleChange(field.key, value)
+                                                    }
+                                                    accept={field.upload?.accept ?? ""}
+                                                    hint={
+                                                        field.upload?.hint ??
+                                                        "Paste the contents below."
+                                                    }
+                                                    placeholder={field.placeholder}
+                                                    required={field.required}
+                                                    disabled={loading}
+                                                />
                                             ) : (
                                                 <Input
                                                     type={field.type || "text"}
