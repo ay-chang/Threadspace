@@ -5,8 +5,10 @@ export type FieldDef = {
     label: string;
     placeholder?: string;
     required?: boolean;
-    type?: "text" | "password" | "select";
+    type?: "text" | "password" | "select" | "textarea";
     options?: { value: string; label: string }[];
+    /** Textarea fields only: also accept the value as an uploaded file. */
+    upload?: { accept: string; hint: string };
 };
 
 export type SectionDef = {
@@ -22,6 +24,8 @@ export type IntegrationSchema = {
     logoAlt: string;
     displayNameField: string;
     sections: SectionDef[];
+    /** Optional link to a setup walkthrough, opened in a new tab. */
+    help?: { href: string; label: string };
 };
 
 const GCP_REGIONS = [
@@ -189,42 +193,30 @@ export const INTEGRATION_SCHEMAS: Record<string, IntegrationSchema> = {
         logo: "/integrations/gcp.svg",
         logoAlt: "Google Cloud logo",
         displayNameField: "projectId",
+        help: {
+            href: "/dashboard/docs/gcp",
+            label: "How to connect Google Cloud",
+        },
         sections: [
             {
                 legend: "Connect Google Cloud",
                 description: (
                     <>
-                        Enter your Google Cloud service account credentials to connect this
-                        project. You can create a service account key in the{" "}
-                        <a
-                            href="https://console.cloud.google.com/iam-admin/serviceaccounts"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            GCP IAM Console
-                        </a>
-                        .
+                        Upload or paste your service account key file. Not sure where to get
+                        one? Follow the step-by-step guide linked above.
                     </>
                 ),
                 fields: [
                     {
-                        key: "projectId",
-                        label: "Project ID",
-                        placeholder: "my-gcp-project",
+                        key: "serviceAccountJson",
+                        label: "Service Account JSON",
+                        placeholder: '{\n  "type": "service_account",\n  "project_id": "my-gcp-project",\n  ...\n}',
                         required: true,
-                    },
-                    {
-                        key: "clientEmail",
-                        label: "Client Email",
-                        placeholder: "service-account@project.iam.gserviceaccount.com",
-                        required: true,
-                    },
-                    {
-                        key: "privateKey",
-                        label: "Private Key",
-                        placeholder: "-----BEGIN PRIVATE KEY-----",
-                        required: true,
-                        type: "password",
+                        type: "textarea",
+                        upload: {
+                            accept: "application/json,.json",
+                            hint: "Upload the .json key file, or paste its contents below.",
+                        },
                     },
                 ],
             },

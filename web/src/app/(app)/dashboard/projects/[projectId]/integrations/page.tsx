@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import IntegrationCard from "@/components/dashboard/IntegrationCard";
 import IntegrationTabs from "./IntegrationTabs";
+import DisconnectButton from "./DisconnectButton";
 import { AVAILABLE_INTEGRATIONS } from "./integrations";
 import { INTEGRATION_SCHEMAS } from "./schemas";
 
@@ -66,15 +67,22 @@ export default async function Integrations({ params }: PageProps) {
                             <div className="text-sm font-medium">{info.name}</div>
                             <div className="text-xs text-muted-foreground truncate">{info.description}</div>
                         </div>
-                        <Link href={
-                            integration.integrationType === "AWS"
-                                ? `/dashboard/projects/${projectId}/integrations/aws/services`
-                                : integration.integrationType === "GOOGLE_CLOUD"
-                                ? `/dashboard/projects/${projectId}/integrations/gcp/services`
-                                : `/dashboard/projects/${projectId}/integrations`
-                        }>
-                            <Button variant="outline" size="sm">Manage</Button>
-                        </Link>
+                        <div className="flex shrink-0 items-center gap-2">
+                            <Link href={
+                                integration.integrationType === "AWS"
+                                    ? `/dashboard/projects/${projectId}/integrations/aws/services`
+                                    : integration.integrationType === "GOOGLE_CLOUD"
+                                    ? `/dashboard/projects/${projectId}/integrations/gcp/services`
+                                    : `/dashboard/projects/${projectId}/integrations`
+                            }>
+                                <Button variant="outline" size="sm">Manage</Button>
+                            </Link>
+                            <DisconnectButton
+                                projectId={projectId}
+                                integrationId={integration.id}
+                                name={info.name}
+                            />
+                        </div>
                     </div>
                 );
             })}

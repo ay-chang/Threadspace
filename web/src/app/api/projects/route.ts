@@ -2,23 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 
-type SessionUser = {
-    id: string;
-    name?: string;
-    email?: string;
-};
-
 const BACKEND_BASE = process.env.BACKEND_BASE!;
 const INTERNAL_SYNC_TOKEN = process.env.INTERNAL_SYNC_TOKEN!;
 
 export async function POST(req: NextRequest) {
     const session = await getServerSession(authOptions);
 
-    if (!session || !session.user || !(session.user as SessionUser).id) {
+    if (!session || !session.user || !session.user.id) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const userId = (session.user as SessionUser).id;
+    const userId = session.user.id;
 
     let body: { name?: string; description?: string; type?: string };
     try {
@@ -73,14 +67,14 @@ export async function GET() {
     if (!session?.user) {
         return NextResponse.json({ error: "Unauthorized: no session" }, { status: 401 });
     }
-    if (!(session.user as any).id) {
+    if (!session.user.id) {
         return NextResponse.json(
             { error: "Session is missing internal user id. The backend upsert may have failed — check that the backend is running." },
             { status: 401 }
         );
     }
 
-    const userId = (session.user as SessionUser).id;
+    const userId = session.user.id;
 
     try {
         const res = await fetch(`${BACKEND_BASE}/projects?userId=${userId}`, {

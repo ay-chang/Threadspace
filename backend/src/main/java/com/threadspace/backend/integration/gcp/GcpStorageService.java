@@ -1,18 +1,14 @@
 package com.threadspace.backend.integration.gcp;
 
-import java.io.ByteArrayInputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.gax.paging.Page;
-import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.Bucket;
 import com.google.cloud.storage.Storage;
-import com.google.cloud.storage.StorageOptions;
 import com.threadspace.backend.integration.core.Integration;
 import com.threadspace.backend.integration.core.IntegrationRepository;
 import com.threadspace.backend.integration.core.IntegrationSecret;
@@ -42,7 +38,7 @@ public class GcpStorageService {
         GcpSecretPayload credentials = getGcpCredentials(projectId);
 
         try {
-            Storage storage = createStorageClient(credentials);
+            Storage storage = GcpIntegrationProvider.createStorageClient(credentials);
             Page<Bucket> buckets = storage.list();
 
             List<GcsBucketInfo> result = new ArrayList<>();
@@ -117,26 +113,6 @@ public class GcpStorageService {
             return objectMapper.readValue(secret.getSecretJson(), GcpSecretPayload.class);
         } catch (Exception e) {
             throw new RuntimeException("Failed to parse GCP credentials", e);
-        }
-    }
-
-    private Storage createStorageClient(GcpSecretPayload credentials) {
-        try {
-            String serviceAccountJson = GcpIntegrationProvider.buildServiceAccountJson(
-                    credentials.projectId(),
-                    credentials.clientEmail(),
-                    credentials.privateKey());
-
-            GoogleCredentials googleCredentials = GoogleCredentials.fromStream(
-                    new ByteArrayInputStream(serviceAccountJson.getBytes(StandardCharsets.UTF_8)));
-
-            return StorageOptions.newBuilder()
-                    .setProjectId(credentials.projectId())
-                    .setCredentials(googleCredentials)
-                    .build()
-                    .getService();
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to create GCS client: " + e.getMessage(), e);
         }
     }
 

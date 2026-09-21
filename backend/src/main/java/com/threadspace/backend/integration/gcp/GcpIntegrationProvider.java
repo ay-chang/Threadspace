@@ -2,10 +2,12 @@ package com.threadspace.backend.integration.gcp;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.storage.Storage;
@@ -22,6 +24,18 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class GcpIntegrationProvider implements IntegrationProvider {
+
+    /**
+     * Fields ServiceAccountCredentials.fromJson requires. Missing any of these
+     * fails deep inside the Google auth library with a message that does not name
+     * the integration, so they are checked up front instead.
+     */
+    private static final List<String> REQUIRED_KEYS = List.of(
+            "client_id",
+            "client_email",
+            "private_key",
+            "private_key_id",
+            "project_id");
 
     private final IntegrationRepository integrationRepository;
     private final IntegrationSecretRepository integrationSecretRepository;
@@ -46,41 +60,30 @@ public class GcpIntegrationProvider implements IntegrationProvider {
         if (projectId == null) {
             throw new IllegalArgumentException("projectId must not be null");
         }
-        if (displayName == null || displayName.isBlank()) {
-            throw new IllegalArgumentException("displayName must not be empty");
-        }
         if (credentials == null || credentials.isEmpty()) {
             throw new IllegalArgumentException("credentials must not be empty");
         }
 
-        String gcpProjectId = credentials.get("projectId");
-        String clientEmail = credentials.get("clientEmail");
-        String privateKey = credentials.get("privateKey");
+        String serviceAccountJson = credentials.get("serviceAccountJson");
+        if (serviceAccountJson == null || serviceAccountJson.isBlank()) {
+            throw new IllegalArgumentException("Service account JSON is required");
+        }
+        serviceAccountJson = serviceAccountJson.trim();
 
-        if (gcpProjectId == null || gcpProjectId.isBlank()) {
-            throw new IllegalArgumentException("GCP projectId is required");
-        }
-        if (clientEmail == null || clientEmail.isBlank()) {
-            throw new IllegalArgumentException("GCP clientEmail is required");
-        }
-        if (privateKey == null || privateKey.isBlank()) {
-            throw new IllegalArgumentException("GCP privateKey is required");
-        }
+        GcpSecretPayload payload = parseServiceAccount(serviceAccountJson);
 
-        // Create row
+        // Validate against GCP before persisting anything as CONNECTED.
+        verifyCredentials(payload);
+
+        // The project_id inside the key file is authoritative, so it names the
+        // integration regardless of what the client sent.
         Integration integration = new Integration();
-        integration.setDisplayName(displayName.trim());
+        integration.setDisplayName(payload.projectId());
         integration.setIntegrationType(IntegrationType.GOOGLE_CLOUD);
         integration.setProjectId(projectId);
-        integration.setIntegrationStatus(IntegrationStatus.PENDING);
+        integration.setIntegrationStatus(IntegrationStatus.CONNECTED);
 
         integration = integrationRepository.save(integration);
-
-        // JSON
-        GcpSecretPayload payload = new GcpSecretPayload(
-                gcpProjectId.trim(),
-                clientEmail.trim(),
-                privateKey.trim());
 
         String json;
         try {
@@ -99,24 +102,51 @@ public class GcpIntegrationProvider implements IntegrationProvider {
 
         integrationSecretRepository.save(secret);
 
-        // Validate GCP credentials
-        verifyCredentials(gcpProjectId.trim(), clientEmail.trim(), privateKey.trim());
-
-        integration.setIntegrationStatus(IntegrationStatus.CONNECTED);
-        return integrationRepository.save(integration);
+        return integration;
     }
 
-    private void verifyCredentials(String gcpProjectId, String clientEmail, String privateKey) {
+    /**
+     * Validates the pasted key file and pulls out the fields worth storing
+     * alongside it. Rejects anything missing a field the Google auth library
+     * needs, so the user gets a message naming the field rather than a parser
+     * error.
+     */
+    private GcpSecretPayload parseServiceAccount(String serviceAccountJson) {
+        JsonNode node;
         try {
-            String serviceAccountJson = buildServiceAccountJson(gcpProjectId, clientEmail, privateKey);
-            GoogleCredentials credentials = GoogleCredentials.fromStream(
-                    new ByteArrayInputStream(serviceAccountJson.getBytes(StandardCharsets.UTF_8)));
+            node = objectMapper.readTree(serviceAccountJson);
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException(
+                    "Service account JSON is not valid JSON. Paste the downloaded key file exactly as-is.", e);
+        }
 
-            Storage storage = StorageOptions.newBuilder()
-                    .setProjectId(gcpProjectId)
-                    .setCredentials(credentials)
-                    .build()
-                    .getService();
+        if (!node.isObject()) {
+            throw new IllegalArgumentException("Service account JSON must be a JSON object");
+        }
+
+        String type = node.path("type").asText("");
+        if (!"service_account".equals(type)) {
+            throw new IllegalArgumentException(
+                    "Expected a service account key file (\"type\": \"service_account\"), got \"" + type + "\"");
+        }
+
+        for (String key : REQUIRED_KEYS) {
+            JsonNode value = node.get(key);
+            if (value == null || value.asText("").isBlank()) {
+                throw new IllegalArgumentException(
+                        "Service account JSON is missing required field \"" + key + "\"");
+            }
+        }
+
+        return new GcpSecretPayload(
+                node.get("project_id").asText(),
+                node.get("client_email").asText(),
+                serviceAccountJson);
+    }
+
+    private void verifyCredentials(GcpSecretPayload payload) {
+        try {
+            Storage storage = createStorageClient(payload);
 
             // Attempt to list buckets to verify credentials
             storage.list(Storage.BucketListOption.pageSize(1));
@@ -125,13 +155,23 @@ public class GcpIntegrationProvider implements IntegrationProvider {
         }
     }
 
-    static String buildServiceAccountJson(String projectId, String clientEmail, String privateKey) {
-        return "{"
-                + "\"type\": \"service_account\","
-                + "\"project_id\": \"" + projectId + "\","
-                + "\"client_email\": \"" + clientEmail + "\","
-                + "\"private_key\": \"" + privateKey.replace("\\n", "\\n") + "\","
-                + "\"token_uri\": \"https://oauth2.googleapis.com/token\""
-                + "}";
+    /**
+     * Builds a GCS client from a stored key file. Shared with GcpStorageService so
+     * both paths authenticate identically.
+     */
+    static Storage createStorageClient(GcpSecretPayload payload) {
+        try {
+            GoogleCredentials credentials = GoogleCredentials.fromStream(
+                    new ByteArrayInputStream(
+                            payload.serviceAccountJson().getBytes(StandardCharsets.UTF_8)));
+
+            return StorageOptions.newBuilder()
+                    .setProjectId(payload.projectId())
+                    .setCredentials(credentials)
+                    .build()
+                    .getService();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to create GCS client: " + e.getMessage(), e);
+        }
     }
 }

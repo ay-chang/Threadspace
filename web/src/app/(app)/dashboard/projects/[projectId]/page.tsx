@@ -4,11 +4,11 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 type PageProps = {
-    params: { projectId: string };
+    params: Promise<{ projectId: string }>;
 };
 
 export default async function ProjectDetailPage({ params }: PageProps) {
-    const { projectId } = params;
+    const { projectId } = await params;
     const projects = await fetchProjects();
     const project = projects.find((p) => p.id === projectId);
 
