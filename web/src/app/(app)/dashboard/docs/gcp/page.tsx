@@ -1,4 +1,9 @@
-import Link from "next/link";
+import {
+    GuideShell,
+    Step,
+    ExternalLink,
+    Troubleshooting,
+} from "../_components/guide";
 import Image from "next/image";
 import {
     Step1Diagram,
@@ -12,49 +17,9 @@ export const metadata = {
     title: "How to connect Google Cloud",
 };
 
-function Step({
-    n,
-    title,
-    children,
-    diagram,
-}: {
-    n: number;
-    title: string;
-    children: React.ReactNode;
-    diagram: React.ReactNode;
-}) {
-    return (
-        <section className="scroll-mt-8" id={`step-${n}`}>
-            <div className="mb-3 flex items-baseline gap-3">
-                <span className="bg-primary text-primary-foreground flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-sm font-semibold">
-                    {n}
-                </span>
-                <h2 className="text-xl font-semibold">{title}</h2>
-            </div>
-            <div className="text-muted-foreground space-y-3 pl-10 text-sm leading-relaxed">
-                {children}
-            </div>
-            <div className="mt-4 pl-10">{diagram}</div>
-        </section>
-    );
-}
-
-function ExternalLink({ href, children }: { href: string; children: React.ReactNode }) {
-    return (
-        <a
-            href={href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-primary font-medium underline underline-offset-4"
-        >
-            {children}
-        </a>
-    );
-}
-
 export default function GcpSetupGuide() {
     return (
-        <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6">
+        <GuideShell>
             <header className="mb-10">
                 <div className="mb-3 flex items-center gap-3">
                     <Image
@@ -184,43 +149,27 @@ export default function GcpSetupGuide() {
                 </Step>
             </div>
 
-            <section className="mt-14">
-                <h2 className="mb-4 text-xl font-semibold">If it doesn&apos;t connect</h2>
-                <dl className="divide-border divide-y rounded-lg border">
-                    {[
-                        {
-                            q: "“missing required field …”",
-                            a: "Something was lost in the copy. Paste the whole file rather than selected lines, or use the upload button instead.",
-                        },
-                        {
-                            q: "A permissions or 403 error",
-                            a: "The service account almost certainly has Storage Object Viewer rather than Storage Admin. Go back to IAM, find the account, and edit its role.",
-                        },
-                        {
-                            q: "A billing error",
-                            a: "Cloud Storage needs an active billing account on the project. An old project may have had its card expire — check the billing page.",
-                        },
-                        {
-                            q: "It connects, but everything shows zero",
-                            a: "That's not an error. The credentials worked and the project simply has no buckets, or the buckets are empty. Create a bucket and upload a few files.",
-                        },
-                    ].map(({ q, a }) => (
-                        <div key={q} className="p-4">
-                            <dt className="text-sm font-medium">{q}</dt>
-                            <dd className="text-muted-foreground mt-1 text-sm leading-relaxed">{a}</dd>
-                        </div>
-                    ))}
-                </dl>
-            </section>
+            <Troubleshooting
+                entries={[
+                    {
+                        q: "\u201Cmissing required field \u2026\u201D",
+                        a: "Something was lost in the copy. Paste the whole file rather than selected lines, or use the upload button instead.",
+                    },
+                    {
+                        q: "A permissions or 403 error",
+                        a: "The service account almost certainly has Storage Object Viewer rather than Storage Admin. Go back to IAM, find the account, and edit its role.",
+                    },
+                    {
+                        q: "A billing error",
+                        a: "Cloud Storage needs an active billing account on the project. An old project may have had its card expire \u2014 check the billing page.",
+                    },
+                    {
+                        q: "It connects, but everything shows zero",
+                        a: "That's not an error. The credentials worked and the project simply has no buckets, or the buckets are empty. Create a bucket and upload a few files.",
+                    },
+                ]}
+            />
 
-            <footer className="border-border mt-12 border-t pt-6">
-                <Link
-                    href="/dashboard"
-                    className="text-muted-foreground hover:text-foreground text-sm"
-                >
-                    ← Back to dashboard
-                </Link>
-            </footer>
-        </div>
+        </GuideShell>
     );
 }

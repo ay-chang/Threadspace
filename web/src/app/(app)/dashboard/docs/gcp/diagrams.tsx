@@ -1,57 +1,19 @@
-/**
- * Stylised mockups of the Google Cloud console screens referenced by the setup
- * guide. These are drawn rather than screenshotted so they stay legible in both
- * themes and never go stale against a console redesign — they show where things
- * sit, not a pixel-accurate capture.
- *
- * Colors come from the app's theme variables so the diagrams follow light/dark.
- * The one fixed color is the Google blue used for primary buttons, which is
- * part of what makes the screens recognisable.
- */
+import {
+    ConsoleFrame,
+    card,
+    border,
+    muted,
+    mutedFg,
+    fg,
+    destructive,
+    GOOGLE_BLUE,
+} from "../_components/ConsoleFrame";
 
-const GOOGLE_BLUE = "#1a73e8";
-
-const card = "var(--card)";
-const border = "var(--border)";
-const muted = "var(--muted)";
-const mutedFg = "var(--muted-foreground)";
-const fg = "var(--foreground)";
-const destructive = "var(--destructive)";
-
-function Frame({
-    children,
-    title,
-    height = 240,
-}: {
-    children: React.ReactNode;
-    title: string;
-    height?: number;
-}) {
-    return (
-        <svg
-            viewBox={`0 0 640 ${height}`}
-            role="img"
-            aria-label={title}
-            className="h-auto w-full rounded-lg border"
-            style={{ borderColor: border, background: card }}
-        >
-            {/* window chrome */}
-            <rect x="0" y="0" width="640" height="34" fill={muted} />
-            <circle cx="18" cy="17" r="5" fill={border} />
-            <circle cx="34" cy="17" r="5" fill={border} />
-            <circle cx="50" cy="17" r="5" fill={border} />
-            <text x="70" y="21" fontSize="11" fill={mutedFg} fontFamily="system-ui">
-                {title}
-            </text>
-            <line x1="0" y1="34" x2="640" y2="34" stroke={border} strokeWidth="1" />
-            {children}
-        </svg>
-    );
-}
+/** Mockups of the Google Cloud console screens referenced by the setup guide. */
 
 export function Step1Diagram() {
     return (
-        <Frame title="console.cloud.google.com" height={200}>
+        <ConsoleFrame title="console.cloud.google.com" height={200}>
             <text x="24" y="70" fontSize="13" fill={mutedFg} fontFamily="system-ui">
                 Select a project
             </text>
@@ -74,13 +36,13 @@ export function Step1Diagram() {
             <text x="300" y="162" fontSize="11" fill={GOOGLE_BLUE} fontFamily="system-ui">
                 ← this is what you need
             </text>
-        </Frame>
+        </ConsoleFrame>
     );
 }
 
 export function Step2Diagram() {
     return (
-        <Frame title="IAM & Admin → Service Accounts" height={230}>
+        <ConsoleFrame title="IAM & Admin → Service Accounts" height={230}>
             <text x="24" y="66" fontSize="14" fill={fg} fontFamily="system-ui" fontWeight="600">
                 Service Accounts
             </text>
@@ -106,13 +68,13 @@ export function Step2Diagram() {
             <text x="24" y="192" fontSize="11" fill={mutedFg} fontFamily="system-ui">
                 Give it any name — the email is generated for you.
             </text>
-        </Frame>
+        </ConsoleFrame>
     );
 }
 
 export function Step3Diagram() {
     return (
-        <Frame title="Grant this service account access to project" height={250}>
+        <ConsoleFrame title="Grant this service account access to project" height={250}>
             <text x="24" y="68" fontSize="13" fill={fg} fontFamily="system-ui" fontWeight="600">
                 Grant this service account access to the project
             </text>
@@ -142,13 +104,13 @@ export function Step3Diagram() {
             <rect x="516" y="218" width="100" height="26" rx="6" fill={GOOGLE_BLUE} />
             <text x="566" y="235" fontSize="12" fill="#fff" fontFamily="system-ui"
                   textAnchor="middle" fontWeight="500">CONTINUE</text>
-        </Frame>
+        </ConsoleFrame>
     );
 }
 
 export function Step4Diagram() {
     return (
-        <Frame title="Service account → Keys" height={250}>
+        <ConsoleFrame title="Service account → Keys" height={250}>
             {/* tab row */}
             <text x="24" y="62" fontSize="12" fill={mutedFg} fontFamily="system-ui">DETAILS</text>
             <text x="100" y="62" fontSize="12" fill={mutedFg} fontFamily="system-ui">PERMISSIONS</text>
@@ -184,13 +146,13 @@ export function Step4Diagram() {
             <text x="40" y="221" fontSize="11.5" fill={fg} fontFamily="system-ui">
                 ↓ my-project-401516-a1b2c3d4.json
             </text>
-        </Frame>
+        </ConsoleFrame>
     );
 }
 
 export function Step5Diagram() {
     return (
-        <Frame title="Threadspace → Connect Google Cloud" height={240}>
+        <ConsoleFrame title="Threadspace → Connect Google Cloud" height={240}>
             <text x="24" y="66" fontSize="14" fill={fg} fontFamily="system-ui" fontWeight="600">
                 Connect Google Cloud
             </text>
@@ -219,6 +181,6 @@ export function Step5Diagram() {
             <text x="36" y="208" fontSize="10" fill={mutedFg} fontFamily="ui-monospace, monospace">
                 {'  "private_key_id": "a1b2c3…", "client_email": "…" }'}
             </text>
-        </Frame>
+        </ConsoleFrame>
     );
 }

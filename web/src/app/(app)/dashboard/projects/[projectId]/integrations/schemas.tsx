@@ -59,6 +59,10 @@ export const INTEGRATION_SCHEMAS: Record<string, IntegrationSchema> = {
         logo: "/vercel-logo.svg",
         logoAlt: "Vercel logo",
         displayNameField: "projectName",
+        help: {
+            href: "/dashboard/docs/vercel",
+            label: "How to connect Vercel",
+        },
         sections: [
             {
                 legend: "Connect Vercel",
@@ -111,6 +115,10 @@ export const INTEGRATION_SCHEMAS: Record<string, IntegrationSchema> = {
         logo: "/integrations/aws.webp",
         logoAlt: "AWS logo",
         displayNameField: "region",
+        help: {
+            href: "/dashboard/docs/aws",
+            label: "How to connect AWS",
+        },
         sections: [
             {
                 legend: "Connect AWS",
