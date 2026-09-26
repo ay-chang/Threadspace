@@ -5,8 +5,10 @@ export type FieldDef = {
     label: string;
     placeholder?: string;
     required?: boolean;
-    type?: "text" | "password" | "select";
+    type?: "text" | "password" | "select" | "textarea";
     options?: { value: string; label: string }[];
+    /** Textarea fields only: also accept the value as an uploaded file. */
+    upload?: { accept: string; hint: string };
 };
 
 export type SectionDef = {
@@ -22,7 +24,33 @@ export type IntegrationSchema = {
     logoAlt: string;
     displayNameField: string;
     sections: SectionDef[];
+    /** Optional link to a setup walkthrough, opened in a new tab. */
+    help?: { href: string; label: string };
 };
+
+const GCP_REGIONS = [
+    { value: "us-central1", label: "US Central (Iowa)" },
+    { value: "us-east1", label: "US East (South Carolina)" },
+    { value: "us-east4", label: "US East (N. Virginia)" },
+    { value: "us-west1", label: "US West (Oregon)" },
+    { value: "us-west2", label: "US West (Los Angeles)" },
+    { value: "us-west3", label: "US West (Salt Lake City)" },
+    { value: "us-west4", label: "US West (Las Vegas)" },
+    { value: "europe-west1", label: "Europe West (Belgium)" },
+    { value: "europe-west2", label: "Europe West (London)" },
+    { value: "europe-west3", label: "Europe West (Frankfurt)" },
+    { value: "europe-west4", label: "Europe West (Netherlands)" },
+    { value: "europe-north1", label: "Europe North (Finland)" },
+    { value: "asia-east1", label: "Asia East (Taiwan)" },
+    { value: "asia-east2", label: "Asia East (Hong Kong)" },
+    { value: "asia-northeast1", label: "Asia Northeast (Tokyo)" },
+    { value: "asia-northeast2", label: "Asia Northeast (Osaka)" },
+    { value: "asia-south1", label: "Asia South (Mumbai)" },
+    { value: "asia-southeast1", label: "Asia Southeast (Singapore)" },
+    { value: "asia-southeast2", label: "Asia Southeast (Jakarta)" },
+    { value: "australia-southeast1", label: "Australia Southeast (Sydney)" },
+    { value: "southamerica-east1", label: "South America East (São Paulo)" },
+];
 
 export const INTEGRATION_SCHEMAS: Record<string, IntegrationSchema> = {
     vercel: {
@@ -31,6 +59,10 @@ export const INTEGRATION_SCHEMAS: Record<string, IntegrationSchema> = {
         logo: "/vercel-logo.svg",
         logoAlt: "Vercel logo",
         displayNameField: "projectName",
+        help: {
+            href: "/dashboard/docs/vercel",
+            label: "How to connect Vercel",
+        },
         sections: [
             {
                 legend: "Connect Vercel",
@@ -83,6 +115,10 @@ export const INTEGRATION_SCHEMAS: Record<string, IntegrationSchema> = {
         logo: "/integrations/aws.webp",
         logoAlt: "AWS logo",
         displayNameField: "region",
+        help: {
+            href: "/dashboard/docs/aws",
+            label: "How to connect AWS",
+        },
         sections: [
             {
                 legend: "Connect AWS",
@@ -154,6 +190,41 @@ export const INTEGRATION_SCHEMAS: Record<string, IntegrationSchema> = {
                         key: "roleArn",
                         label: "Role ARN",
                         placeholder: "arn:aws:iam::123456789:role/...",
+                    },
+                ],
+            },
+        ],
+    },
+    gcp: {
+        backendType: "GOOGLE_CLOUD",
+        name: "Google Cloud",
+        logo: "/integrations/gcp.svg",
+        logoAlt: "Google Cloud logo",
+        displayNameField: "projectId",
+        help: {
+            href: "/dashboard/docs/gcp",
+            label: "How to connect Google Cloud",
+        },
+        sections: [
+            {
+                legend: "Connect Google Cloud",
+                description: (
+                    <>
+                        Upload or paste your service account key file. Not sure where to get
+                        one? Follow the step-by-step guide linked above.
+                    </>
+                ),
+                fields: [
+                    {
+                        key: "serviceAccountJson",
+                        label: "Service Account JSON",
+                        placeholder: '{\n  "type": "service_account",\n  "project_id": "my-gcp-project",\n  ...\n}',
+                        required: true,
+                        type: "textarea",
+                        upload: {
+                            accept: "application/json,.json",
+                            hint: "Upload the .json key file, or paste its contents below.",
+                        },
                     },
                 ],
             },

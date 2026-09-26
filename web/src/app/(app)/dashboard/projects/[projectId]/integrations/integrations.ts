@@ -35,6 +35,13 @@ export const AVAILABLE_INTEGRATIONS = [
       logoAlt: "AWS logo",
     },
     {
+      id: "gcp",
+      name: "Google Cloud",
+      description: "See data from your Google Cloud services",
+      logoSrc: "/integrations/gcp.svg",
+      logoAlt: "Google Cloud logo",
+    },
+    {
       id: "google_ads",
       name: "Google Ads",
       description: "See metrics from your Google Ads",

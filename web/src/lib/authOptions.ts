@@ -20,7 +20,7 @@ export const authOptions: NextAuthOptions = {
         // Called at sign-in time and on subsequent JWT refreshes
         async jwt({ token, account, profile }) {
             // If we already have the internal userId, do nothing
-            if (typeof (token as any).userId === "string") {
+            if (typeof token.userId === "string") {
                 return token;
             }
 
@@ -51,11 +51,11 @@ export const authOptions: NextAuthOptions = {
                     }
 
                     const user: { id: string } = await res.json();
-                    (token as any).userId = user.id;
+                    token.userId = user.id;
                 } catch (e) {
                     console.error("Next upsert failed:", e);
                 }
-            } else if (!(token as any).userId && token.sub) {
+            } else if (!token.userId && token.sub) {
                 // Fallback: if the token lacks userId (e.g., after a reset) but we have a provider id,
                 // upsert again using token fields to recover the internal user id.
                 try {
@@ -78,7 +78,7 @@ export const authOptions: NextAuthOptions = {
                     }
 
                     const user: { id: string } = await res.json();
-                    (token as any).userId = user.id;
+                    token.userId = user.id;
                 } catch (e) {
                     console.error("Next upsert fallback failed:", e);
                 }
@@ -88,8 +88,8 @@ export const authOptions: NextAuthOptions = {
         },
         // Expose userId on the session object for client usage
         async session({ session, token }) {
-            if (session.user && "userId" in token && typeof token.userId === "string") {
-                (session.user as { id?: string }).id = token.userId;
+            if (session.user && typeof token.userId === "string") {
+                session.user.id = token.userId;
             }
             return session;
         },

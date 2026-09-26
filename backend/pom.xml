@@ -67,6 +67,13 @@
 			<artifactId>s3</artifactId>
 			<version>2.25.0</version>
 		</dependency>
+
+		<!-- Google Cloud Storage -->
+		<dependency>
+			<groupId>com.google.cloud</groupId>
+			<artifactId>google-cloud-storage</artifactId>
+			<version>2.36.1</version>
+		</dependency>
 	</dependencies>
 
 	<build>
