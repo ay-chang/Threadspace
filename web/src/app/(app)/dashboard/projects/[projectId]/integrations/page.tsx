@@ -18,6 +18,15 @@ type IntegrationResponse = {
     displayName: string;
 };
 
+// Where each connected integration's Manage button leads, relative to /integrations.
+const MANAGE_PATHS: Record<string, string> = {
+    AWS: "aws/services",
+    GOOGLE_CLOUD: "gcp/services",
+    STRIPE: "stripe/revenue",
+    APPLE_CONNECT: "apple/sales",
+    GOOGLE_ANALYTICS: "google_analytics/traffic",
+};
+
 const BACKEND_BASE = process.env.BACKEND_BASE!;
 const INTERNAL_SYNC_TOKEN = process.env.INTERNAL_SYNC_TOKEN!;
 
@@ -69,10 +78,8 @@ export default async function Integrations({ params }: PageProps) {
                         </div>
                         <div className="flex shrink-0 items-center gap-2">
                             <Link href={
-                                integration.integrationType === "AWS"
-                                    ? `/dashboard/projects/${projectId}/integrations/aws/services`
-                                    : integration.integrationType === "GOOGLE_CLOUD"
-                                    ? `/dashboard/projects/${projectId}/integrations/gcp/services`
+                                MANAGE_PATHS[integration.integrationType]
+                                    ? `/dashboard/projects/${projectId}/integrations/${MANAGE_PATHS[integration.integrationType]}`
                                     : `/dashboard/projects/${projectId}/integrations`
                             }>
                                 <Button variant="outline" size="sm">Manage</Button>

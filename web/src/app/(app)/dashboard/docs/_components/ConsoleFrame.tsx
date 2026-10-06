@@ -21,6 +21,9 @@ export const GOOGLE_BLUE = "#1a73e8";
 export const AWS_ORANGE = "#ec7211";
 export const AWS_SQUID = "#232f3e";
 export const VERCEL_FG = "var(--foreground)";
+export const STRIPE_PURPLE = "#635bff";
+export const APPLE_BLUE = "#0071e3";
+export const GA_ORANGE = "#e37400";
 
 export function ConsoleFrame({
     children,
