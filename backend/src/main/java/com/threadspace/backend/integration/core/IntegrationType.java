@@ -5,5 +5,6 @@ public enum IntegrationType {
     AWS,
     GOOGLE_CLOUD,
     APPLE_CONNECT,
-    STRIPE
+    STRIPE,
+    GOOGLE_ANALYTICS
 }

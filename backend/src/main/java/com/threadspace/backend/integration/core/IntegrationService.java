@@ -92,7 +92,9 @@ public class IntegrationService {
 
         // Secret first: it references the integration, and leaving an orphaned
         // credential behind is worse than leaving an orphaned integration row.
-        integrationSecretRepository.deleteByIntegrationId(integration.getId());
+        // The secret's content lives in a Postgres large object that outlives
+        // its row, so this removes both together.
+        integrationSecretRepository.deleteWithCredentials(integration.getId());
         integrationRepository.delete(integration);
     }
 

@@ -7,6 +7,13 @@ export const AVAILABLE_INTEGRATIONS = [
       logoAlt: "OpenAI logo",
     },
     {
+      id: "stripe",
+      name: "Stripe",
+      description: "Revenue, subscriptions, and payments from Stripe",
+      logoSrc: "/integrations/stripe.svg",
+      logoAlt: "Stripe logo",
+    },
+    {
       id: "vercel",
       name: "Vercel",
       description: "Deploy and preview your app directly from the dashboard.",
@@ -15,8 +22,8 @@ export const AVAILABLE_INTEGRATIONS = [
     },
     {
       id: "apple",
-      name: "Apple iOS Connect",
-      description: "See data from your deployed iOS applications",
+      name: "App Store Connect",
+      description: "Downloads, in-app purchases, and proceeds from the App Store",
       logoSrc: "/integrations/apple.svg",
       logoAlt: "Apple logo",
     },
@@ -40,6 +47,13 @@ export const AVAILABLE_INTEGRATIONS = [
       description: "See data from your Google Cloud services",
       logoSrc: "/integrations/gcp.svg",
       logoAlt: "Google Cloud logo",
+    },
+    {
+      id: "google_analytics",
+      name: "Google Analytics",
+      description: "Users, sessions, and top pages from your GA4 property",
+      logoSrc: "/integrations/google_analytics.svg",
+      logoAlt: "Google Analytics logo",
     },
     {
       id: "google_ads",

@@ -79,7 +79,7 @@ export default function ConnectIntegrationPage() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     integrationType: schema.backendType,
-                    displayName: values[schema.displayNameField] || schema.name,
+                    displayName: (schema.displayNameField && values[schema.displayNameField]) || schema.name,
                     credentials,
                 }),
             });

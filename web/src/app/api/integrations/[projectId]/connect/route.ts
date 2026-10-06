@@ -40,26 +40,18 @@ export async function POST(
         if (!res.ok) {
             const text = await res.text()
 
-            // Try to parse backend error and provide user-friendly message
+            // The backend returns {error} with a message written for the user
+            // (e.g. "That's a publishable key"). Pass it through unchanged;
+            // rewriting it into a generic line hides what actually went wrong.
             let errorMessage = "Failed to connect integration"
             try {
                 const errorData = JSON.parse(text)
-                if (errorData.error || errorData.message) {
-                    // Check for common error patterns
-                    const backendError = errorData.error || errorData.message
-                    if (backendError.includes("credentials") || backendError.includes("authentication") || backendError.includes("access")) {
-                        errorMessage = "Invalid credentials. Please check your access keys and try again."
-                    } else {
-                        errorMessage = backendError
-                    }
+                if (typeof errorData.error === "string" && res.status === 400) {
+                    errorMessage = errorData.error
                 }
             } catch {
-                // If not JSON or parsing fails, check text for credential errors
-                if (text.includes("credentials") || text.includes("authentication") || text.includes("access")) {
-                    errorMessage = "Invalid credentials. Please check your access keys and try again."
-                } else if (text) {
-                    errorMessage = text
-                }
+                // Non-JSON body: keep the generic message rather than echoing
+                // an arbitrary server response to the user.
             }
 
             return NextResponse.json(

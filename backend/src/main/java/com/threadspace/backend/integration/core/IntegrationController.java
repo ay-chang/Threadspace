@@ -65,7 +65,7 @@ public class IntegrationController {
     }
 
     @PostMapping("/connect")
-    public ResponseEntity<IntegrationResponse> connectIntegration(
+    public ResponseEntity<?> connectIntegration(
             @PathVariable("projectId") UUID projectId,
             @RequestBody IntegrationConnectRequest body,
             @RequestHeader(name = "x-internal-token", required = false) String token) {
@@ -74,11 +74,19 @@ public class IntegrationController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        Integration integration = integrationService.connectIntegration(
-                projectId,
-                body.integrationType(),
-                body.displayName(),
-                body.credentials());
+        Integration integration;
+        try {
+            integration = integrationService.connectIntegration(
+                    projectId,
+                    body.integrationType(),
+                    body.displayName(),
+                    body.credentials());
+        } catch (IllegalArgumentException e) {
+            // Providers throw IllegalArgumentException with a message written for
+            // the user (bad key format, missing permission, rejected credentials).
+            // Without this it became a bare 500 and the message was lost.
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
 
         IntegrationResponse response = new IntegrationResponse(
                 integration.getId(),

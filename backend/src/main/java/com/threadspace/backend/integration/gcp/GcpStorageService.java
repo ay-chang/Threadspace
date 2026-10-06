@@ -24,13 +24,16 @@ public class GcpStorageService {
     private final IntegrationRepository integrationRepository;
     private final IntegrationSecretRepository integrationSecretRepository;
     private final ObjectMapper objectMapper;
+    private final GcpStorageClients storageClients;
 
     public GcpStorageService(IntegrationRepository integrationRepository,
             IntegrationSecretRepository integrationSecretRepository,
-            ObjectMapper objectMapper) {
+            ObjectMapper objectMapper,
+            GcpStorageClients storageClients) {
         this.integrationRepository = integrationRepository;
         this.integrationSecretRepository = integrationSecretRepository;
         this.objectMapper = objectMapper;
+        this.storageClients = storageClients;
     }
 
     @Transactional(readOnly = true)
@@ -38,7 +41,7 @@ public class GcpStorageService {
         GcpSecretPayload credentials = getGcpCredentials(projectId);
 
         try {
-            Storage storage = GcpIntegrationProvider.createStorageClient(credentials);
+            Storage storage = storageClients.create(credentials);
             Page<Bucket> buckets = storage.list();
 
             List<GcsBucketInfo> result = new ArrayList<>();

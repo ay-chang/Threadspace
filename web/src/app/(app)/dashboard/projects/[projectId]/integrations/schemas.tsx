@@ -22,7 +22,11 @@ export type IntegrationSchema = {
     name: string;
     logo: string;
     logoAlt: string;
-    displayNameField: string;
+    /**
+     * Field whose value becomes the integration's display name. Omit it when
+     * every field is a secret; the backend then names the integration itself.
+     */
+    displayNameField?: string;
     sections: SectionDef[];
     /** Optional link to a setup walkthrough, opened in a new tab. */
     help?: { href: string; label: string };
@@ -211,10 +215,142 @@ export const INTEGRATION_SCHEMAS: Record<string, IntegrationSchema> = {
                 description: (
                     <>
                         Upload or paste your service account key file. Not sure where to get
-                        one? Follow the step-by-step guide linked above.
+                        one? Follow the step-by-step guide linked below.
                     </>
                 ),
                 fields: [
+                    {
+                        key: "serviceAccountJson",
+                        label: "Service Account JSON",
+                        placeholder: '{\n  "type": "service_account",\n  "project_id": "my-gcp-project",\n  ...\n}',
+                        required: true,
+                        type: "textarea",
+                        upload: {
+                            accept: "application/json,.json",
+                            hint: "Upload the .json key file, or paste its contents below.",
+                        },
+                    },
+                ],
+            },
+        ],
+    },
+    stripe: {
+        backendType: "STRIPE",
+        name: "Stripe",
+        logo: "/integrations/stripe.svg",
+        logoAlt: "Stripe logo",
+        help: {
+            href: "/dashboard/docs/stripe",
+            label: "How to connect Stripe",
+        },
+        sections: [
+            {
+                legend: "Connect Stripe",
+                description: (
+                    <>
+                        Paste a restricted API key with read access. A restricted key is safer than
+                        your secret key: it can only read the data Threadspace shows. The guide
+                        linked below walks through creating one.
+                    </>
+                ),
+                fields: [
+                    {
+                        key: "apiKey",
+                        label: "Restricted API Key",
+                        placeholder: "rk_live_...",
+                        required: true,
+                        type: "password",
+                    },
+                ],
+            },
+        ],
+    },
+    apple: {
+        backendType: "APPLE_CONNECT",
+        name: "App Store Connect",
+        logo: "/integrations/apple.svg",
+        logoAlt: "Apple logo",
+        displayNameField: "keyId",
+        help: {
+            href: "/dashboard/docs/app-store-connect",
+            label: "How to connect App Store Connect",
+        },
+        sections: [
+            {
+                legend: "Connect App Store Connect",
+                description: (
+                    <>
+                        Create an App Store Connect API key with the Sales role, then enter its
+                        details here. The guide linked below shows where each value lives.
+                    </>
+                ),
+                fields: [
+                    {
+                        key: "issuerId",
+                        label: "Issuer ID",
+                        placeholder: "57246542-96fe-1a63-e053-0824d011072a",
+                        required: true,
+                    },
+                    {
+                        key: "keyId",
+                        label: "Key ID",
+                        placeholder: "2X9R4HXF34",
+                        required: true,
+                    },
+                    {
+                        key: "privateKey",
+                        label: "Private Key (.p8)",
+                        placeholder: "-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----",
+                        required: true,
+                        type: "textarea",
+                        upload: {
+                            accept: ".p8",
+                            hint: "Upload the AuthKey_XXXXXXXXXX.p8 file, or paste its contents below.",
+                        },
+                    },
+                ],
+            },
+            {
+                legend: "Sales Reports",
+                description:
+                    "Your vendor number identifies which sales reports to read. Find it under Payments and Financial Reports.",
+                fields: [
+                    {
+                        key: "vendorNumber",
+                        label: "Vendor Number",
+                        placeholder: "85012345",
+                        required: true,
+                    },
+                ],
+            },
+        ],
+    },
+    google_analytics: {
+        backendType: "GOOGLE_ANALYTICS",
+        name: "Google Analytics",
+        logo: "/integrations/google_analytics.svg",
+        logoAlt: "Google Analytics logo",
+        displayNameField: "propertyId",
+        help: {
+            href: "/dashboard/docs/google-analytics",
+            label: "How to connect Google Analytics",
+        },
+        sections: [
+            {
+                legend: "Connect Google Analytics",
+                description: (
+                    <>
+                        Enter your GA4 Property ID and a service account key that has been added to
+                        the property as a Viewer. The guide linked below covers both.
+                    </>
+                ),
+                fields: [
+                    {
+                        key: "propertyId",
+                        label: "Property ID",
+                        placeholder: "123456789",
+                        required: true,
+                    },
                     {
                         key: "serviceAccountJson",
                         label: "Service Account JSON",
